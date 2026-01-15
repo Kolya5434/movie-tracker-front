@@ -6,14 +6,17 @@ import classes from './MovieList.module.scss'
 interface MovieListProps {
   moviePromise: Promise<Movie[]>
   onMovieClick?: (movie: Movie) => void
+  limit?: number
 }
 
-export function MovieList({ moviePromise, onMovieClick }: MovieListProps) {
-  const movies = use(moviePromise)
+export function MovieList({ moviePromise, onMovieClick, limit }: MovieListProps) {
+  const allMovies = use(moviePromise)
 
-  if (!movies || movies.length === 0) {
+  if (!allMovies || allMovies.length === 0) {
     return <div className={classes.empty}>Список порожній</div>
   }
+
+  const movies = limit ? allMovies.slice(0, limit) : allMovies
 
   return (
     <ul className={classes.list}>
@@ -23,15 +26,15 @@ export function MovieList({ moviePromise, onMovieClick }: MovieListProps) {
           className={classes.item}
           onClick={() => onMovieClick?.(movie)}
         >
-          <div className={classes.header}>
+          <div className={classes.content}>
             <h3 className={classes.title}>{movie.title}</h3>
-            <span className={`${classes.rating} ${movie.rating && movie.rating >= 8 ? classes.high : ''}`}>
-              {movie.rating ?? '-'}
-            </span>
+            <div className={classes.meta}>
+              {TYPE_LABELS[movie.type] || movie.type} • {STATUS_LABELS[movie.status] || movie.status}
+            </div>
           </div>
-          <div className={classes.meta}>
-            {TYPE_LABELS[movie.type] || movie.type} • {STATUS_LABELS[movie.status] || movie.status}
-          </div>
+          <span className={`${classes.rating} ${movie.rating && movie.rating >= 8 ? classes.high : ''}`}>
+            {movie.rating ?? '-'}
+          </span>
         </li>
       ))}
     </ul>

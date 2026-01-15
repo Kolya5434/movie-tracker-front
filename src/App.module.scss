@@ -1,15 +1,227 @@
 .app {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
+  min-height: 100vh;
+  padding: 16px;
   font-family: system-ui, -apple-system, sans-serif;
+  max-width: 900px;
+  margin: 0 auto;
+
+  @media (min-width: 768px) {
+    padding: 32px;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 60px 32px;
+  }
+}
+
+// Header для внутрішніх сторінок
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #333;
+}
+
+.backButton {
+  background: transparent;
+  border: 1px solid #444;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #333;
+    border-color: #2e7d32;
+  }
 }
 
 .title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #fff;
+
+  @media (min-width: 768px) {
+    font-size: 1.5rem;
+  }
+}
+
+// Hero секція
+.hero {
   text-align: center;
+  padding: 32px 16px;
+  margin-bottom: 32px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #262626 100%);
+  border-radius: 16px;
+  border: 1px solid #333;
+
+  @media (min-width: 768px) {
+    padding: 48px 32px;
+    margin-bottom: 48px;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 64px 48px;
+    border-radius: 24px;
+  }
+}
+
+.heroTitle {
+  margin: 0 0 8px;
+  font-size: 1.75rem;
+  color: #fff;
+  font-weight: 700;
+
+  @media (min-width: 768px) {
+    font-size: 2.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    font-size: 3rem;
+    margin-bottom: 12px;
+  }
+}
+
+.heroSubtitle {
+  margin: 0 0 24px;
+  color: #888;
+  font-size: 0.95rem;
+
+  @media (min-width: 768px) {
+    font-size: 1.1rem;
+    margin-bottom: 32px;
+  }
+
+  @media (min-width: 1024px) {
+    font-size: 1.25rem;
+    margin-bottom: 40px;
+  }
+}
+
+.heroActions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.primaryButton {
+  background: #2e7d32;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 140px;
+
+  &:hover {
+    background: #388e3c;
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  @media (min-width: 768px) {
+    padding: 14px 32px;
+    font-size: 1.05rem;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 16px 40px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+  }
+}
+
+.secondaryButton {
+  background: transparent;
+  color: #fff;
+  border: 2px solid #444;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 140px;
+
+  &:hover {
+    border-color: #2e7d32;
+    background: rgba(46, 125, 50, 0.1);
+  }
+
+  @media (min-width: 768px) {
+    padding: 14px 32px;
+    font-size: 1.05rem;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 16px 40px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+  }
+}
+
+// Секція останніх записів
+.recentSection {
+  margin-bottom: 32px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+
+  @media (min-width: 768px) {
+    margin-bottom: 24px;
+  }
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #fff;
+  font-weight: 600;
+
+  @media (min-width: 768px) {
+    font-size: 1.35rem;
+  }
+
+  @media (min-width: 1024px) {
+    font-size: 1.5rem;
+  }
+}
+
+.linkButton {
+  background: transparent;
+  border: none;
+  color: #2e7d32;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 8px;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #4caf50;
+  }
+
+  @media (min-width: 768px) {
+    font-size: 1rem;
+  }
 }
 
 .loading {
   text-align: center;
   color: #888;
+  padding: 32px;
 }
