@@ -9,6 +9,7 @@ interface MovieFormProps {
   movie?: Movie | null
   onSuccess: () => void
   onCancel?: () => void
+  onDelete?: (movie: Movie) => void
 }
 
 interface FormValues {
@@ -18,7 +19,7 @@ interface FormValues {
   rating: number | ''
 }
 
-export function MovieForm({ movie, onSuccess, onCancel }: MovieFormProps) {
+export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const isEditing = !!movie
 
@@ -127,6 +128,16 @@ export function MovieForm({ movie, onSuccess, onCancel }: MovieFormProps) {
           {isSubmitting ? 'Зберігаю...' : isEditing ? 'Зберегти' : 'Додати'}
         </button>
       </div>
+
+      {isEditing && onDelete && (
+        <button
+          type="button"
+          onClick={() => onDelete(movie)}
+          className={classes.deleteButton}
+        >
+          Видалити
+        </button>
+      )}
     </form>
   )
 }

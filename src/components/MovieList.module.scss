@@ -53,8 +53,14 @@
   -webkit-box-orient: vertical;
 }
 
-.rating {
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   flex-shrink: 0;
+}
+
+.rating {
   padding: 6px 10px;
   border-radius: 6px;
   font-weight: 700;
@@ -65,6 +71,28 @@
 
   &.high {
     background: #2e7d32;
+  }
+}
+
+.deleteButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: transparent;
+  color: #888;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    border-color: #c62828;
+    background: #c62828;
+    color: #fff;
   }
 }
 

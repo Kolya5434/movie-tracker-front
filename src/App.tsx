@@ -1,7 +1,9 @@
 import { Suspense, useState } from 'react'
 import { fetchMovies } from './utils/getMovies.ts'
+import { deleteMovie } from './utils/deleteMovie.ts'
 import { MovieForm } from './components/MovieForm.tsx'
 import { MovieList, type MovieFilters } from './components/MovieList.tsx'
+import { ConfirmModal } from './components/ConfirmModal.tsx'
 import { TYPE_LABELS, STATUS_LABELS } from './constants/constants.ts'
 import type { Movie } from './types/movie.ts'
 import classes from './App.module.scss'
@@ -13,6 +15,8 @@ function App() {
   const [editingMovie, setEditingMovie] = useState<Movie | null>(null)
   const [currentView, setCurrentView] = useState<View>('home')
   const [filters, setFilters] = useState<MovieFilters>({})
+  const [movieToDelete, setMovieToDelete] = useState<Movie | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const refreshMovies = () => {
     setMoviePromise(fetchMovies())
@@ -49,6 +53,30 @@ function App() {
     setCurrentView('home')
   }
 
+  const handleDeleteRequest = (movie: Movie) => {
+    setMovieToDelete(movie)
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!movieToDelete) return
+    setIsDeleting(true)
+    try {
+      await deleteMovie(movieToDelete.id)
+      setMovieToDelete(null)
+      setEditingMovie(null)
+      setCurrentView('home')
+      refreshMovies()
+    } catch (error) {
+      alert('Помилка при видаленні: ' + error)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const handleDeleteCancel = () => {
+    setMovieToDelete(null)
+  }
+
   // Форма додавання/редагування
   if (currentView === 'add') {
     return (
@@ -65,6 +93,16 @@ function App() {
           movie={editingMovie}
           onSuccess={handleFormSuccess}
           onCancel={handleCancel}
+          onDelete={handleDeleteRequest}
+        />
+
+        <ConfirmModal
+          isOpen={!!movieToDelete}
+          title="Видалити запис?"
+          message={`Ви впевнені, що хочете видалити "${movieToDelete?.title}"? Цю дію не можна скасувати.`}
+          onConfirm={handleDeleteConfirm}
+          onCancel={handleDeleteCancel}
+          isLoading={isDeleting}
         />
       </div>
     )
@@ -109,9 +147,19 @@ function App() {
           <MovieList
             moviePromise={moviePromise}
             onMovieClick={handleMovieClick}
+            onDelete={handleDeleteRequest}
             filters={filters}
           />
         </Suspense>
+
+        <ConfirmModal
+          isOpen={!!movieToDelete}
+          title="Видалити запис?"
+          message={`Ви впевнені, що хочете видалити "${movieToDelete?.title}"? Цю дію не можна скасувати.`}
+          onConfirm={handleDeleteConfirm}
+          onCancel={handleDeleteCancel}
+          isLoading={isDeleting}
+        />
       </div>
     )
   }
@@ -143,10 +191,20 @@ function App() {
           <MovieList
             moviePromise={moviePromise}
             onMovieClick={handleMovieClick}
+            onDelete={handleDeleteRequest}
             limit={4}
           />
         </Suspense>
       </section>
+
+      <ConfirmModal
+        isOpen={!!movieToDelete}
+        title="Видалити запис?"
+        message={`Ви впевнені, що хочете видалити "${movieToDelete?.title}"? Цю дію не можна скасувати.`}
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        isLoading={isDeleting}
+      />
     </div>
   )
 }
