@@ -3,7 +3,21 @@ import { addMovie, type MovieInsert } from '../utils/addMovie'
 import { updateMovie } from '../utils/updateMovie'
 import { useState, useEffect } from 'react'
 import type { Movie } from '../types/movie'
+import { CustomSelect } from './CustomSelect'
 import classes from './MovieForm.module.scss'
+
+const TYPE_OPTIONS = [
+  { value: 'movie', label: 'Фільм' },
+  { value: 'series', label: 'Серіал' },
+  { value: 'anime', label: 'Аніме' }
+]
+
+const STATUS_OPTIONS = [
+  { value: 'planned', label: 'Планую' },
+  { value: 'watching', label: 'Дивлюсь' },
+  { value: 'finished', label: 'Завершено' },
+  { value: 'dropped', label: 'Кинув' }
+]
 
 interface MovieFormProps {
   movie?: Movie | null
@@ -27,6 +41,8 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
     register,
     handleSubmit,
     reset,
+    watch,
+    setValue,
     formState: { errors }
   } = useForm<FormValues>({
     defaultValues: {
@@ -36,6 +52,9 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
       rating: movie?.rating ?? ''
     }
   })
+
+  const typeValue = watch('type')
+  const statusValue = watch('status')
 
   useEffect(() => {
     reset({
@@ -82,37 +101,44 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
         )}
       </div>
 
-      <div className={classes.item}>
+      <div className={classes.field}>
+        <label className={classes.label}>Назва</label>
         <input
           {...register('title', { required: 'Назва обовʼязкова' })}
-          placeholder="Назва фільму/серіалу"
+          placeholder="Введіть назву"
           className={classes.input}
         />
         {errors.title && <span className={classes.error}>{errors.title.message}</span>}
       </div>
 
       <div className={classes.row}>
-        <select {...register('type')} className={classes.input}>
-          <option value="movie">Фільм</option>
-          <option value="series">Серіал</option>
-          <option value="anime">Аніме</option>
-        </select>
+        <div className={classes.field}>
+          <label className={classes.label}>Тип</label>
+          <CustomSelect
+            options={TYPE_OPTIONS}
+            value={typeValue || 'movie'}
+            onChange={(val) => setValue('type', val as MovieInsert['type'])}
+          />
+        </div>
 
-        <select {...register('status')} className={classes.input}>
-          <option value="planned">Планую</option>
-          <option value="watching">Дивлюсь</option>
-          <option value="finished">Завершено</option>
-          <option value="dropped">Кинув</option>
-        </select>
+        <div className={classes.field}>
+          <label className={classes.label}>Статус</label>
+          <CustomSelect
+            options={STATUS_OPTIONS}
+            value={statusValue || 'planned'}
+            onChange={(val) => setValue('status', val as MovieInsert['status'])}
+          />
+        </div>
       </div>
 
-      <div className={classes.item}>
+      <div className={classes.field}>
+        <label className={classes.label}>Оцінка</label>
         <input
           type="number"
           step="0.1"
           min="0"
           max="10"
-          placeholder="Оцінка (0-10)"
+          placeholder="0 - 10"
           {...register('rating', { min: 0, max: 10 })}
           className={classes.input}
         />
