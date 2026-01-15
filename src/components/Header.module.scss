@@ -1,0 +1,87 @@
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 0;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #333;
+
+  @media (min-width: 768px) {
+    justify-content: space-between;
+    padding: 16px 0;
+    margin-bottom: 24px;
+  }
+}
+
+.logo {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  @media (min-width: 768px) {
+    font-size: 1.5rem;
+    gap: 10px;
+  }
+
+  &:hover {
+    color: #4caf50;
+  }
+}
+
+.logoIcon {
+  width: 22px;
+  height: 22px;
+  color: #4caf50;
+
+  @media (min-width: 768px) {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+.nav {
+  display: none;
+  align-items: center;
+  gap: 8px;
+
+  @media (min-width: 768px) {
+    display: flex;
+  }
+}
+
+.navItem {
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 0.95rem;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 0.2s, background-color 0.2s;
+
+  &:hover {
+    color: #fff;
+    background: #333;
+  }
+
+  &.active {
+    color: #fff;
+    background: #333;
+  }
+}
+
+.addButton {
+  background: #2e7d32;
+  color: #fff;
+  font-weight: 500;
+
+  &:hover {
+    background: #388e3c;
+  }
+}

@@ -6,6 +6,8 @@ import { MovieList, type MovieFilters } from './components/MovieList.tsx'
 import { ConfirmModal } from './components/ConfirmModal.tsx'
 import { FilterDrawer, type FilterValues } from './components/FilterDrawer.tsx'
 import { CustomSelect, type SelectOption } from './components/CustomSelect.tsx'
+import { Header } from './components/Header.tsx'
+import { MobileNav } from './components/MobileNav.tsx'
 import { TYPE_LABELS, STATUS_LABELS } from './constants/constants.ts'
 import type { Movie } from './types/movie.ts'
 import classes from './App.module.scss'
@@ -73,6 +75,16 @@ function App() {
     setCurrentView('home')
   }
 
+  const handleNavigate = (view: View) => {
+    if (view === 'add') {
+      handleAddClick()
+    } else if (view === 'all') {
+      handleViewAll()
+    } else {
+      handleBackHome()
+    }
+  }
+
   const handleFilterValuesChange = (values: FilterValues) => {
     setFilterValues(values)
     setFilters(f => ({
@@ -118,11 +130,12 @@ function App() {
   if (currentView === 'add') {
     return (
       <div className={classes.app}>
-        <header className={classes.header}>
+        <Header currentView={currentView} onNavigate={handleNavigate} />
+        <header className={classes.pageHeader}>
           <button className={classes.backButton} onClick={handleCancel}>
             ← Назад
           </button>
-          <h1 className={classes.title}>
+          <h1 className={classes.pageTitle}>
             {editingMovie ? 'Редагування' : 'Новий запис'}
           </h1>
         </header>
@@ -141,6 +154,7 @@ function App() {
           onCancel={handleDeleteCancel}
           isLoading={isDeleting}
         />
+        <MobileNav currentView={currentView} onNavigate={handleNavigate} />
       </div>
     )
   }
@@ -149,11 +163,9 @@ function App() {
   if (currentView === 'all') {
     return (
       <div className={classes.app}>
-        <header className={classes.header}>
-          <button className={classes.backButton} onClick={handleBackHome}>
-            ← Назад
-          </button>
-          <h1 className={classes.title}>Усі записи</h1>
+        <Header currentView={currentView} onNavigate={handleNavigate} />
+        <header className={classes.pageHeader}>
+          <h1 className={classes.pageTitle}>Усі записи</h1>
         </header>
 
         <div className={classes.filters}>
@@ -205,6 +217,7 @@ function App() {
           onCancel={handleDeleteCancel}
           isLoading={isDeleting}
         />
+        <MobileNav currentView={currentView} onNavigate={handleNavigate} />
       </div>
     )
   }
@@ -212,35 +225,22 @@ function App() {
   // Головний екран
   return (
     <div className={classes.app}>
-      <section className={classes.hero}>
-        <h1 className={classes.heroTitle}>Мій Watchlist</h1>
-        <p className={classes.heroSubtitle}>Відстежуй фільми, серіали та аніме</p>
-        <div className={classes.heroActions}>
-          <button className={classes.primaryButton} onClick={handleAddClick}>
-            + Додати
-          </button>
-          <button className={classes.secondaryButton} onClick={handleViewAll}>
-            Переглянути всі
-          </button>
-        </div>
-      </section>
+      <Header currentView={currentView} onNavigate={handleNavigate} />
+      <header className={classes.pageHeader}>
+        <h1 className={classes.pageTitle}>Останні додані</h1>
+        <button className={classes.linkButton} onClick={handleViewAll}>
+          Всі →
+        </button>
+      </header>
 
-      <section className={classes.recentSection}>
-        <div className={classes.sectionHeader}>
-          <h2 className={classes.sectionTitle}>Останні додані</h2>
-          <button className={classes.linkButton} onClick={handleViewAll}>
-            Всі →
-          </button>
-        </div>
-        <Suspense fallback={<p className={classes.loading}>Завантаження...</p>}>
-          <MovieList
-            moviePromise={moviePromise}
-            onMovieClick={handleMovieClick}
-            onDelete={handleDeleteRequest}
-            limit={4}
-          />
-        </Suspense>
-      </section>
+      <Suspense fallback={<p className={classes.loading}>Завантаження...</p>}>
+        <MovieList
+          moviePromise={moviePromise}
+          onMovieClick={handleMovieClick}
+          onDelete={handleDeleteRequest}
+          limit={6}
+        />
+      </Suspense>
 
       <ConfirmModal
         isOpen={!!movieToDelete}
@@ -250,6 +250,7 @@ function App() {
         onCancel={handleDeleteCancel}
         isLoading={isDeleting}
       />
+      <MobileNav currentView={currentView} onNavigate={handleNavigate} />
     </div>
   )
 }
