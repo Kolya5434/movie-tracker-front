@@ -2,24 +2,62 @@
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Theme colors */
+  --bg-primary: #121212;
+  --bg-secondary: #1a1a1a;
+  --bg-tertiary: #242424;
+  --bg-hover: #333;
+
+  --text-primary: #fff;
+  --text-secondary: #aaa;
+  --text-muted: #888;
+  --text-dimmed: #666;
+
+  --border-color: #333;
+  --border-hover: #444;
+
+  --accent: #2e7d32;
+  --accent-hover: #388e3c;
+  --accent-light: #4caf50;
+
+  --danger: #c62828;
+
+  color-scheme: dark;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+}
+
+[data-theme="light"] {
+  --bg-primary: #f5f5f5;
+  --bg-secondary: #fff;
+  --bg-tertiary: #e8e8e8;
+  --bg-hover: #e0e0e0;
+
+  --text-primary: #1a1a1a;
+  --text-secondary: #555;
+  --text-muted: #777;
+  --text-dimmed: #999;
+
+  --border-color: #ddd;
+  --border-hover: #bbb;
+
+  color-scheme: light;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
 }
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--accent-light);
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: var(--accent-hover);
 }
 
 body {
@@ -45,27 +83,15 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--bg-secondary);
   cursor: pointer;
   transition: border-color 0.25s;
+  -webkit-tap-highlight-color: transparent;
 }
 button:hover {
-  border-color: #646cff;
+  border-color: var(--accent);
 }
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+  outline: none;
 }

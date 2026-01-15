@@ -31,8 +31,8 @@
 
 .backButton {
   background: transparent;
-  border: 1px solid #444;
-  color: #fff;
+  border: 1px solid var(--border-hover);
+  color: var(--text-primary);
   padding: 8px 16px;
   border-radius: 8px;
   cursor: pointer;
@@ -40,8 +40,8 @@
   transition: all 0.2s;
 
   &:hover {
-    background: #333;
-    border-color: #2e7d32;
+    background: var(--bg-hover);
+    border-color: var(--accent);
   }
 
   @media (min-width: 768px) {
@@ -52,7 +52,7 @@
 .pageTitle {
   margin: 0;
   font-size: 1.25rem;
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 600;
 
   @media (min-width: 768px) {
@@ -63,14 +63,14 @@
 .linkButton {
   background: transparent;
   border: none;
-  color: #2e7d32;
+  color: var(--accent);
   font-size: 0.9rem;
   cursor: pointer;
   padding: 8px;
   transition: color 0.2s;
 
   &:hover {
-    color: #4caf50;
+    color: var(--accent-light);
   }
 
   @media (min-width: 768px) {
@@ -80,7 +80,7 @@
 
 .loading {
   text-align: center;
-  color: #888;
+  color: var(--text-muted);
   padding: 32px;
 }
 
@@ -97,9 +97,9 @@
   min-width: 140px;
   padding: 12px 16px;
   border-radius: 8px;
-  border: 1px solid #333;
-  background: #1a1a1a;
-  color: #fff;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   font-size: 0.95rem;
   cursor: pointer;
   appearance: none;
@@ -108,12 +108,12 @@
   background-position: right 12px center;
 
   &:hover {
-    border-color: #444;
+    border-color: var(--border-hover);
   }
 
   &:focus {
     outline: none;
-    border-color: #2e7d32;
+    border-color: var(--accent);
   }
 
   @media (min-width: 500px) {
@@ -138,22 +138,21 @@
   gap: 8px;
   padding: 12px 16px;
   border-radius: 8px;
-  border: 1px solid #333;
-  background: #1a1a1a;
-  color: #fff;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
   font-size: 0.95rem;
   cursor: pointer;
   transition: border-color 0.2s, color 0.2s;
 
   &:hover {
-    border-color: #444;
-    color: #fff;
+    border-color: var(--border-hover);
   }
 
   &.active {
-    border-color: #2e7d32;
-    color: #fff;
+    border-color: var(--accent);
   }
+
   @media (max-width: 720px) {
     width: 100%;
   }
@@ -162,6 +161,6 @@
 .filterBadge {
   width: 8px;
   height: 8px;
-  background: #2e7d32;
+  background: var(--accent);
   border-radius: 50%;
 }

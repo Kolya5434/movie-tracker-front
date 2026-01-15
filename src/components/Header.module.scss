@@ -1,13 +1,12 @@
 .header {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   padding: 12px 0;
   margin-bottom: 16px;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--border-color);
 
   @media (min-width: 768px) {
-    justify-content: space-between;
     padding: 16px 0;
     margin-bottom: 24px;
   }
@@ -17,7 +16,7 @@
   margin: 0;
   font-size: 1.25rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-primary);
   cursor: pointer;
   transition: color 0.2s;
   display: flex;
@@ -30,19 +29,25 @@
   }
 
   &:hover {
-    color: #4caf50;
+    color: var(--accent-light);
   }
 }
 
 .logoIcon {
   width: 22px;
   height: 22px;
-  color: #4caf50;
+  color: var(--accent-light);
 
   @media (min-width: 768px) {
     width: 26px;
     height: 26px;
   }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .nav {
@@ -58,7 +63,7 @@
 .navItem {
   background: transparent;
   border: none;
-  color: #888;
+  color: var(--text-muted);
   font-size: 0.95rem;
   padding: 8px 16px;
   border-radius: 8px;
@@ -66,22 +71,22 @@
   transition: color 0.2s, background-color 0.2s;
 
   &:hover {
-    color: #fff;
-    background: #333;
+    color: var(--text-primary);
+    background: var(--bg-hover);
   }
 
   &.active {
-    color: #fff;
-    background: #333;
+    color: var(--text-primary);
+    background: var(--bg-hover);
   }
 }
 
 .addButton {
-  background: #2e7d32;
+  background: var(--accent);
   color: #fff;
   font-weight: 500;
 
   &:hover {
-    background: #388e3c;
+    background: var(--accent-hover);
   }
 }

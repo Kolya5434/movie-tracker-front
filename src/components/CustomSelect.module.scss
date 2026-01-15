@@ -13,26 +13,26 @@
   padding: 0 12px;
   box-sizing: border-box;
 
-  background-color: #262626;
-  border: 1px solid #404040;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-hover);
   border-radius: 6px;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 14px;
   cursor: pointer;
   transition: border-color 0.2s;
   text-align: left;
 
   &:hover {
-    border-color: #555;
+    border-color: var(--border-hover);
   }
 
   &:focus {
     outline: none;
-    border-color: #2e7d32;
+    border-color: var(--accent);
   }
 
   &.open {
-    border-color: #2e7d32;
+    border-color: var(--accent);
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
   }
@@ -47,7 +47,7 @@
 
 .arrow {
   font-size: 10px;
-  color: #888;
+  color: var(--text-muted);
   transition: transform 0.2s;
 
   .open & {
@@ -63,8 +63,8 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  background-color: #262626;
-  border: 1px solid #2e7d32;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--accent);
   border-top: none;
   border-bottom-left-radius: 6px;
   border-bottom-right-radius: 6px;
@@ -91,11 +91,11 @@
   transition: background-color 0.15s;
 
   &:hover {
-    background-color: #333;
+    background-color: var(--bg-hover);
   }
 
   &.selected {
-    background-color: #2e7d32;
+    background-color: var(--accent);
     color: #fff;
   }
 

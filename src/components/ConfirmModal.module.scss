@@ -20,8 +20,8 @@
 }
 
 .modal {
-  background: #1a1a1a;
-  border: 1px solid #333;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 24px;
   max-width: 400px;
@@ -43,13 +43,13 @@
 .title {
   margin: 0 0 12px;
   font-size: 1.25rem;
-  color: #fff;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
 .message {
   margin: 0 0 24px;
-  color: #aaa;
+  color: var(--text-secondary);
   font-size: 0.95rem;
   line-height: 1.5;
 }
@@ -63,16 +63,16 @@
 .cancelButton {
   padding: 10px 20px;
   border-radius: 8px;
-  border: 1px solid #444;
+  border: 1px solid var(--border-hover);
   background: transparent;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.2s;
 
   &:hover:not(:disabled) {
-    background: #333;
-    border-color: #555;
+    background: var(--bg-hover);
+    border-color: var(--border-hover);
   }
 
   &:disabled {
@@ -85,7 +85,7 @@
   padding: 10px 20px;
   border-radius: 8px;
   border: none;
-  background: #c62828;
+  background: var(--danger);
   color: #fff;
   font-size: 0.95rem;
   font-weight: 600;

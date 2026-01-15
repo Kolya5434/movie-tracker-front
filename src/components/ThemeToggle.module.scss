@@ -1,0 +1,22 @@
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.2s, border-color 0.2s, background-color 0.2s;
+
+  &:hover {
+    color: var(--accent-light);
+    border-color: var(--accent);
+    background: var(--bg-hover);
+  }
+}

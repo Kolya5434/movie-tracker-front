@@ -8,6 +8,7 @@ import { FilterDrawer, type FilterValues } from './components/FilterDrawer.tsx'
 import { CustomSelect, type SelectOption } from './components/CustomSelect.tsx'
 import { Header } from './components/Header.tsx'
 import { MobileNav } from './components/MobileNav.tsx'
+import { useTheme } from './hooks/useTheme.ts'
 import { TYPE_LABELS, STATUS_LABELS } from './constants/constants.ts'
 import type { Movie } from './types/movie.ts'
 import classes from './App.module.scss'
@@ -29,6 +30,7 @@ const STATUS_OPTIONS: SelectOption[] = [
 type View = 'home' | 'add' | 'all'
 
 function App() {
+  const { theme, toggleTheme } = useTheme()
   const [moviePromise, setMoviePromise] = useState(() => fetchMovies())
   const [editingMovie, setEditingMovie] = useState<Movie | null>(null)
   const [currentView, setCurrentView] = useState<View>('home')
@@ -130,7 +132,7 @@ function App() {
   if (currentView === 'add') {
     return (
       <div className={classes.app}>
-        <Header currentView={currentView} onNavigate={handleNavigate} />
+        <Header currentView={currentView} onNavigate={handleNavigate} theme={theme} onThemeToggle={toggleTheme} />
         <header className={classes.pageHeader}>
           <button className={classes.backButton} onClick={handleCancel}>
             ← Назад
@@ -163,7 +165,7 @@ function App() {
   if (currentView === 'all') {
     return (
       <div className={classes.app}>
-        <Header currentView={currentView} onNavigate={handleNavigate} />
+        <Header currentView={currentView} onNavigate={handleNavigate} theme={theme} onThemeToggle={toggleTheme} />
         <header className={classes.pageHeader}>
           <h1 className={classes.pageTitle}>Усі записи</h1>
         </header>
@@ -225,7 +227,7 @@ function App() {
   // Головний екран
   return (
     <div className={classes.app}>
-      <Header currentView={currentView} onNavigate={handleNavigate} />
+      <Header currentView={currentView} onNavigate={handleNavigate} theme={theme} onThemeToggle={toggleTheme} />
       <header className={classes.pageHeader}>
         <h1 className={classes.pageTitle}>Останні додані</h1>
         <button className={classes.linkButton} onClick={handleViewAll}>

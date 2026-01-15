@@ -1,3 +1,4 @@
+import { ThemeToggle } from './ThemeToggle'
 import classes from './Header.module.scss'
 
 type View = 'home' | 'add' | 'all'
@@ -5,9 +6,11 @@ type View = 'home' | 'add' | 'all'
 interface HeaderProps {
   currentView: View
   onNavigate: (view: View) => void
+  theme: 'dark' | 'light'
+  onThemeToggle: () => void
 }
 
-export function Header({ currentView, onNavigate }: HeaderProps) {
+export function Header({ currentView, onNavigate, theme, onThemeToggle }: HeaderProps) {
   return (
     <header className={classes.header}>
       <h1 className={classes.logo} onClick={() => onNavigate('home')}>
@@ -25,26 +28,29 @@ export function Header({ currentView, onNavigate }: HeaderProps) {
         </svg>
         Watchlist
       </h1>
-      <nav className={classes.nav}>
-        <button
-          className={`${classes.navItem} ${currentView === 'home' ? classes.active : ''}`}
-          onClick={() => onNavigate('home')}
-        >
-          Головна
-        </button>
-        <button
-          className={`${classes.navItem} ${currentView === 'all' ? classes.active : ''}`}
-          onClick={() => onNavigate('all')}
-        >
-          Усі записи
-        </button>
-        <button
-          className={`${classes.navItem} ${classes.addButton}`}
-          onClick={() => onNavigate('add')}
-        >
-          + Додати
-        </button>
-      </nav>
+      <div className={classes.actions}>
+        <nav className={classes.nav}>
+          <button
+            className={`${classes.navItem} ${currentView === 'home' ? classes.active : ''}`}
+            onClick={() => onNavigate('home')}
+          >
+            Головна
+          </button>
+          <button
+            className={`${classes.navItem} ${currentView === 'all' ? classes.active : ''}`}
+            onClick={() => onNavigate('all')}
+          >
+            Усі записи
+          </button>
+          <button
+            className={`${classes.navItem} ${classes.addButton}`}
+            onClick={() => onNavigate('add')}
+          >
+            + Додати
+          </button>
+        </nav>
+        <ThemeToggle theme={theme} onToggle={onThemeToggle} />
+      </div>
     </header>
   )
 }

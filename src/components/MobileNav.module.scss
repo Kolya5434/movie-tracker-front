@@ -6,8 +6,8 @@
   display: flex;
   justify-content: space-around;
   align-items: center;
-  background: #1a1a1a;
-  border-top: 1px solid #333;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
   padding: 8px 16px;
   padding-bottom: max(8px, env(safe-area-inset-bottom));
   z-index: 100;
@@ -24,18 +24,20 @@
   gap: 4px;
   background: transparent;
   border: none;
-  color: #666;
+  outline: none;
+  color: var(--text-dimmed);
   padding: 8px 16px;
   cursor: pointer;
   transition: color 0.2s;
+  -webkit-tap-highlight-color: transparent;
 
   &:hover,
   &.active {
-    color: #fff;
+    color: var(--text-primary);
   }
 
   &.active .icon {
-    color: #4caf50;
+    color: var(--accent-light);
   }
 }
 
@@ -62,7 +64,7 @@
   justify-content: center;
   width: 48px;
   height: 48px;
-  background: #2e7d32;
+  background: var(--accent);
   border-radius: 50%;
   color: #fff;
   margin-top: -20px;
@@ -71,10 +73,10 @@
 
   &:hover {
     transform: scale(1.05);
-    background: #388e3c;
+    background: var(--accent-hover);
   }
 }
 
 .addItem.active .addIcon {
-  background: #388e3c;
+  background: var(--accent-hover);
 }

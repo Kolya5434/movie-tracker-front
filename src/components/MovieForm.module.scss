@@ -8,9 +8,9 @@
   padding: 16px;
   box-sizing: border-box;
 
-  border: 1px solid #333;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
-  background-color: #1a1a1a;
+  background-color: var(--bg-secondary);
 
   @media (min-width: 480px) {
     padding: 24px;
@@ -30,7 +30,7 @@
 .cancelButton {
   background: none;
   border: none;
-  color: #888;
+  color: var(--text-muted);
   font-size: 18px;
   cursor: pointer;
   padding: 4px 8px;
@@ -38,8 +38,8 @@
   transition: color 0.2s, background-color 0.2s;
 
   &:hover {
-    color: #fff;
-    background-color: #333;
+    color: var(--text-primary);
+    background-color: var(--bg-hover);
   }
 }
 
@@ -53,7 +53,7 @@
 .label {
   font-size: 13px;
   font-weight: 500;
-  color: #aaa;
+  color: var(--text-secondary);
 }
 
 .row {
@@ -74,20 +74,20 @@
   padding: 0 12px;
   box-sizing: border-box;
 
-  background-color: #262626;
-  border: 1px solid #404040;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-hover);
   border-radius: 6px;
-  color: #fff;
+  color: var(--text-primary);
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s;
 
   &::placeholder {
-    color: #666;
+    color: var(--text-dimmed);
   }
 
   &:focus {
-    border-color: #2e7d32;
+    border-color: var(--accent);
   }
 }
 
@@ -101,7 +101,7 @@
   height: 42px;
   padding: 0 16px;
 
-  background-color: #2e7d32;
+  background-color: var(--accent);
   border: none;
   border-radius: 6px;
   color: #fff;
@@ -111,11 +111,12 @@
   transition: background-color 0.2s;
 
   &:hover:not(:disabled) {
-    background-color: #388e3c;
+    background-color: var(--accent-hover);
   }
 
   &:disabled {
-    background-color: #555;
+    background-color: var(--bg-hover);
+    color: var(--text-muted);
     cursor: not-allowed;
   }
 }
@@ -126,17 +127,17 @@
   padding: 0 16px;
 
   background-color: transparent;
-  border: 1px solid #555;
+  border: 1px solid var(--border-hover);
   border-radius: 6px;
-  color: #aaa;
+  color: var(--text-secondary);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: border-color 0.2s, color 0.2s;
 
   &:hover {
-    border-color: #888;
-    color: #fff;
+    border-color: var(--text-muted);
+    color: var(--text-primary);
   }
 }
 
@@ -147,16 +148,16 @@
   margin-top: -4px;
 
   background-color: transparent;
-  border: 1px solid #c62828;
+  border: 1px solid var(--danger);
   border-radius: 6px;
-  color: #c62828;
+  color: var(--danger);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s, color 0.2s;
 
   &:hover {
-    background-color: #c62828;
+    background-color: var(--danger);
     color: #fff;
   }
 }
