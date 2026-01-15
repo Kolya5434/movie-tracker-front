@@ -198,6 +198,7 @@ function App() {
           <MovieList
             moviePromise={moviePromise}
             onMovieClick={handleMovieClick}
+            onEdit={handleMovieClick}
             onDelete={handleDeleteRequest}
             filters={filters}
           />
@@ -239,6 +240,7 @@ function App() {
         <MovieList
           moviePromise={moviePromise}
           onMovieClick={handleMovieClick}
+          onEdit={handleMovieClick}
           onDelete={handleDeleteRequest}
           limit={6}
         />
