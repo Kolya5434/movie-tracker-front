@@ -15,7 +15,7 @@
 .item {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   padding: 16px;
   border: 1px solid #333;
@@ -61,13 +61,17 @@
 }
 
 .rating {
-  padding: 6px 10px;
+  height: 32px;
+  padding: 0 10px;
   border-radius: 6px;
   font-weight: 700;
   font-size: 0.9rem;
   background: #333;
   min-width: 36px;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &.high {
     background: #2e7d32;
