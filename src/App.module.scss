@@ -225,3 +225,41 @@
   color: #888;
   padding: 32px;
 }
+
+// Фільтри
+.filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.select {
+  flex: 1;
+  min-width: 140px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #333;
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 0.95rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+
+  &:hover {
+    border-color: #444;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #2e7d32;
+  }
+
+  @media (min-width: 500px) {
+    flex: none;
+    min-width: 160px;
+  }
+}

@@ -1,7 +1,8 @@
 import { Suspense, useState } from 'react'
 import { fetchMovies } from './utils/getMovies.ts'
 import { MovieForm } from './components/MovieForm.tsx'
-import { MovieList } from './components/MovieList.tsx'
+import { MovieList, type MovieFilters } from './components/MovieList.tsx'
+import { TYPE_LABELS, STATUS_LABELS } from './constants/constants.ts'
 import type { Movie } from './types/movie.ts'
 import classes from './App.module.scss'
 
@@ -11,6 +12,7 @@ function App() {
   const [moviePromise, setMoviePromise] = useState(() => fetchMovies())
   const [editingMovie, setEditingMovie] = useState<Movie | null>(null)
   const [currentView, setCurrentView] = useState<View>('home')
+  const [filters, setFilters] = useState<MovieFilters>({})
 
   const refreshMovies = () => {
     setMoviePromise(fetchMovies())
@@ -38,10 +40,12 @@ function App() {
   }
 
   const handleViewAll = () => {
+    setFilters({})
     setCurrentView('all')
   }
 
   const handleBackHome = () => {
+    setFilters({})
     setCurrentView('home')
   }
 
@@ -76,8 +80,37 @@ function App() {
           </button>
           <h1 className={classes.title}>Усі записи</h1>
         </header>
+
+        <div className={classes.filters}>
+          <select
+            className={classes.select}
+            value={filters.type || ''}
+            onChange={(e) => setFilters(f => ({ ...f, type: e.target.value || undefined }))}
+          >
+            <option value="">Усі типи</option>
+            {Object.entries(TYPE_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+
+          <select
+            className={classes.select}
+            value={filters.status || ''}
+            onChange={(e) => setFilters(f => ({ ...f, status: e.target.value || undefined }))}
+          >
+            <option value="">Усі статуси</option>
+            {Object.entries(STATUS_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+        </div>
+
         <Suspense fallback={<p className={classes.loading}>Завантаження...</p>}>
-          <MovieList moviePromise={moviePromise} onMovieClick={handleMovieClick} />
+          <MovieList
+            moviePromise={moviePromise}
+            onMovieClick={handleMovieClick}
+            filters={filters}
+          />
         </Suspense>
       </div>
     )
