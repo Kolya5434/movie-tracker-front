@@ -6,6 +6,7 @@ import classes from './MovieList.module.scss'
 export interface MovieFilters {
   type?: string
   status?: string
+  ratingRange?: [number, number]
 }
 
 interface MovieListProps {
@@ -29,6 +30,13 @@ export function MovieList({ moviePromise, onMovieClick, onDelete, limit, filters
   }
   if (filters?.status) {
     filtered = filtered.filter(m => m.status === filters.status)
+  }
+  if (filters?.ratingRange) {
+    const [minRating, maxRating] = filters.ratingRange
+    filtered = filtered.filter(m => {
+      if (m.rating === null || m.rating === undefined) return minRating === 0
+      return m.rating >= minRating && m.rating <= maxRating
+    })
   }
 
   if (filtered.length === 0) {

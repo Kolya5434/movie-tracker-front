@@ -4,9 +4,14 @@ import { deleteMovie } from './utils/deleteMovie.ts'
 import { MovieForm } from './components/MovieForm.tsx'
 import { MovieList, type MovieFilters } from './components/MovieList.tsx'
 import { ConfirmModal } from './components/ConfirmModal.tsx'
+import { FilterDrawer, type FilterValues } from './components/FilterDrawer.tsx'
 import { TYPE_LABELS, STATUS_LABELS } from './constants/constants.ts'
 import type { Movie } from './types/movie.ts'
 import classes from './App.module.scss'
+
+const DEFAULT_FILTER_VALUES: FilterValues = {
+  ratingRange: [0, 10]
+}
 
 type View = 'home' | 'add' | 'all'
 
@@ -17,6 +22,8 @@ function App() {
   const [filters, setFilters] = useState<MovieFilters>({})
   const [movieToDelete, setMovieToDelete] = useState<Movie | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [filterValues, setFilterValues] = useState<FilterValues>(DEFAULT_FILTER_VALUES)
 
   const refreshMovies = () => {
     setMoviePromise(fetchMovies())
@@ -45,13 +52,32 @@ function App() {
 
   const handleViewAll = () => {
     setFilters({})
+    setFilterValues(DEFAULT_FILTER_VALUES)
     setCurrentView('all')
   }
 
   const handleBackHome = () => {
     setFilters({})
+    setFilterValues(DEFAULT_FILTER_VALUES)
     setCurrentView('home')
   }
+
+  const handleFilterValuesChange = (values: FilterValues) => {
+    setFilterValues(values)
+    setFilters(f => ({
+      ...f,
+      ratingRange: values.ratingRange[0] === 0 && values.ratingRange[1] === 10
+        ? undefined
+        : values.ratingRange
+    }))
+  }
+
+  const handleFilterReset = () => {
+    setFilterValues(DEFAULT_FILTER_VALUES)
+    setFilters(f => ({ ...f, ratingRange: undefined }))
+  }
+
+  const hasActiveAdvancedFilters = filterValues.ratingRange[0] > 0 || filterValues.ratingRange[1] < 10
 
   const handleDeleteRequest = (movie: Movie) => {
     setMovieToDelete(movie)
@@ -141,6 +167,14 @@ function App() {
               <option key={value} value={value}>{label}</option>
             ))}
           </select>
+
+          <button
+            className={`${classes.filterButton} ${hasActiveAdvancedFilters ? classes.active : ''}`}
+            onClick={() => setIsFilterOpen(true)}
+          >
+            <span>Фільтри</span>
+            {hasActiveAdvancedFilters && <span className={classes.filterBadge} />}
+          </button>
         </div>
 
         <Suspense fallback={<p className={classes.loading}>Завантаження...</p>}>
@@ -151,6 +185,14 @@ function App() {
             filters={filters}
           />
         </Suspense>
+
+        <FilterDrawer
+          isOpen={isFilterOpen}
+          onClose={() => setIsFilterOpen(false)}
+          values={filterValues}
+          onChange={handleFilterValuesChange}
+          onReset={handleFilterReset}
+        />
 
         <ConfirmModal
           isOpen={!!movieToDelete}
