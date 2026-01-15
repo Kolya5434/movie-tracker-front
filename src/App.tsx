@@ -5,6 +5,7 @@ import { MovieForm } from './components/MovieForm.tsx'
 import { MovieList, type MovieFilters } from './components/MovieList.tsx'
 import { ConfirmModal } from './components/ConfirmModal.tsx'
 import { FilterDrawer, type FilterValues } from './components/FilterDrawer.tsx'
+import { CustomSelect, type SelectOption } from './components/CustomSelect.tsx'
 import { TYPE_LABELS, STATUS_LABELS } from './constants/constants.ts'
 import type { Movie } from './types/movie.ts'
 import classes from './App.module.scss'
@@ -12,6 +13,16 @@ import classes from './App.module.scss'
 const DEFAULT_FILTER_VALUES: FilterValues = {
   ratingRange: [0, 10]
 }
+
+const TYPE_OPTIONS: SelectOption[] = [
+  { value: '', label: 'Усі типи' },
+  ...Object.entries(TYPE_LABELS).map(([value, label]) => ({ value, label }))
+]
+
+const STATUS_OPTIONS: SelectOption[] = [
+  { value: '', label: 'Усі статуси' },
+  ...Object.entries(STATUS_LABELS).map(([value, label]) => ({ value, label }))
+]
 
 type View = 'home' | 'add' | 'all'
 
@@ -146,27 +157,19 @@ function App() {
         </header>
 
         <div className={classes.filters}>
-          <select
-            className={classes.select}
+          <CustomSelect
+            options={TYPE_OPTIONS}
             value={filters.type || ''}
-            onChange={(e) => setFilters(f => ({ ...f, type: e.target.value || undefined }))}
-          >
-            <option value="">Усі типи</option>
-            {Object.entries(TYPE_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </select>
+            onChange={(value) => setFilters(f => ({ ...f, type: value || undefined }))}
+            className={classes.filterSelect}
+          />
 
-          <select
-            className={classes.select}
+          <CustomSelect
+            options={STATUS_OPTIONS}
             value={filters.status || ''}
-            onChange={(e) => setFilters(f => ({ ...f, status: e.target.value || undefined }))}
-          >
-            <option value="">Усі статуси</option>
-            {Object.entries(STATUS_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </select>
+            onChange={(value) => setFilters(f => ({ ...f, status: value || undefined }))}
+            className={classes.filterSelect}
+          />
 
           <button
             className={`${classes.filterButton} ${hasActiveAdvancedFilters ? classes.active : ''}`}

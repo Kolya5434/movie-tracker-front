@@ -10,9 +10,10 @@ interface CustomSelectProps {
   options: SelectOption[]
   value: string
   onChange: (value: string) => void
+  className?: string
 }
 
-export function CustomSelect({ options, value, onChange }: CustomSelectProps) {
+export function CustomSelect({ options, value, onChange, className }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
   const selectRef = useRef<HTMLDivElement>(null)
 
@@ -53,7 +54,7 @@ export function CustomSelect({ options, value, onChange }: CustomSelectProps) {
   }
 
   return (
-    <div className={classes.select} ref={selectRef}>
+    <div className={`${classes.select} ${className || ''}`} ref={selectRef}>
       <button
         type="button"
         className={`${classes.trigger} ${isOpen ? classes.open : ''}`}

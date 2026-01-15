@@ -272,6 +272,15 @@
   }
 }
 
+.filterSelect {
+  flex: 1;
+  min-width: 0;
+
+  @media (max-width: 720px) {
+    flex-basis: calc(50% - 6px);
+  }
+}
+
 .filterButton {
   display: flex;
   align-items: center;
