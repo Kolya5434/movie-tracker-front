@@ -46,10 +46,15 @@
     align-items: center;
     justify-content: center;
     color: white;
+    transition: transform 0.15s ease, width 0.15s ease;
 
     &:active {
       transform: scale(0.9);
     }
+  }
+
+  &.fullSwipe button {
+    transform: scale(1.2);
   }
 }
 
@@ -58,7 +63,7 @@
 }
 
 .deleteAction button {
-  background: #ef4444;
+  background: #5b1919;
 }
 
 .item {

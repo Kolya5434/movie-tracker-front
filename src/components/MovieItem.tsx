@@ -1,4 +1,4 @@
-import { useState, useRef, type TouchEvent } from 'react'
+import { useState, useRef, useEffect, type TouchEvent } from 'react'
 import type { Movie } from '../types/movie'
 import { STATUS_LABELS, TYPE_LABELS } from '../constants/constants'
 import classes from './MovieList.module.scss'
@@ -8,25 +8,51 @@ interface MovieItemProps {
   onClick?: (movie: Movie) => void
   onEdit?: (movie: Movie) => void
   onDelete?: (movie: Movie) => void
+  isActive?: boolean
+  onSwipeStart?: () => void
+  onSwipeEnd?: () => void
 }
 
-export function MovieItem({ movie, onClick, onEdit, onDelete }: MovieItemProps) {
+const SWIPE_THRESHOLD = 60
+const FULL_SWIPE_THRESHOLD = 140
+const SWIPE_OPEN_OFFSET = 80
+
+export function MovieItem({
+  movie,
+  onClick,
+  onEdit,
+  onDelete,
+  isActive,
+  onSwipeStart,
+  onSwipeEnd,
+}: MovieItemProps) {
   const [offset, setOffset] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
 
   const startX = useRef(0)
   const currentOffset = useRef(0)
+  const itemRef = useRef<HTMLDivElement>(null)
+
+  // Reset offset when another item becomes active
+  useEffect(() => {
+    if (!isActive && offset !== 0) {
+      setOffset(0)
+    }
+  }, [isActive])
 
   const handleTouchStart = (e: TouchEvent) => {
     startX.current = e.touches[0].clientX
     setIsDragging(true)
+    onSwipeStart?.()
   }
 
   const handleTouchMove = (e: TouchEvent) => {
     const touchX = e.touches[0].clientX
     const delta = touchX - startX.current
 
-    if (delta > 150 || delta < -150) return
+    // Allow more movement for full swipe
+    const maxOffset = FULL_SWIPE_THRESHOLD + 20
+    if (delta > maxOffset || delta < -maxOffset) return
 
     currentOffset.current = delta
     setOffset(delta)
@@ -34,14 +60,32 @@ export function MovieItem({ movie, onClick, onEdit, onDelete }: MovieItemProps) 
 
   const handleTouchEnd = () => {
     setIsDragging(false)
-    const threshold = 60
+    const swipeOffset = currentOffset.current
 
-    if (currentOffset.current > threshold) {
-      setOffset(80)
-    } else if (currentOffset.current < -threshold) {
-      setOffset(-80)
-    } else {
+    // Full swipe right - trigger edit
+    if (swipeOffset >= FULL_SWIPE_THRESHOLD) {
       setOffset(0)
+      onSwipeEnd?.()
+      onEdit?.(movie)
+    }
+    // Full swipe left - trigger delete
+    else if (swipeOffset <= -FULL_SWIPE_THRESHOLD) {
+      setOffset(0)
+      onSwipeEnd?.()
+      onDelete?.(movie)
+    }
+    // Partial swipe right - open edit action
+    else if (swipeOffset > SWIPE_THRESHOLD) {
+      setOffset(SWIPE_OPEN_OFFSET)
+    }
+    // Partial swipe left - open delete action
+    else if (swipeOffset < -SWIPE_THRESHOLD) {
+      setOffset(-SWIPE_OPEN_OFFSET)
+    }
+    // Not enough swipe - reset
+    else {
+      setOffset(0)
+      onSwipeEnd?.()
     }
 
     currentOffset.current = 0
@@ -50,28 +94,40 @@ export function MovieItem({ movie, onClick, onEdit, onDelete }: MovieItemProps) 
   const handleEditAction = (e: React.MouseEvent) => {
     e.stopPropagation()
     setOffset(0)
+    onSwipeEnd?.()
     setTimeout(() => onEdit?.(movie), 300)
   }
 
   const handleDeleteAction = (e: React.MouseEvent) => {
     e.stopPropagation()
     setOffset(0)
+    onSwipeEnd?.()
     setTimeout(() => onDelete?.(movie), 300)
   }
+
+  const isFullSwipeRight = offset >= FULL_SWIPE_THRESHOLD
+  const isFullSwipeLeft = offset <= -FULL_SWIPE_THRESHOLD
 
   return (
     <li className={classes.swipeContainer}>
       <div className={classes.backgroundActions}>
-        <div className={`${classes.actionBtn} ${classes.editAction}`} style={{ opacity: offset > 0 ? 1 : 0 }}>
+        <div
+          className={`${classes.actionBtn} ${classes.editAction} ${isFullSwipeRight ? classes.fullSwipe : ''}`}
+          style={{ opacity: offset > 0 ? 1 : 0 }}
+        >
           <button onClick={handleEditAction}>✏️</button>
         </div>
 
-        <div className={`${classes.actionBtn} ${classes.deleteAction}`} style={{ opacity: offset < 0 ? 1 : 0 }}>
-          <button onClick={handleDeleteAction}>🗑️</button>
+        <div
+          className={`${classes.actionBtn} ${classes.deleteAction} ${isFullSwipeLeft ? classes.fullSwipe : ''}`}
+          style={{ opacity: offset < 0 ? 1 : 0 }}
+        >
+          <button onClick={handleDeleteAction}>🗑</button>
         </div>
       </div>
 
       <div
+        ref={itemRef}
         className={classes.item}
         onClick={() => onClick?.(movie)}
         onTouchStart={handleTouchStart}
