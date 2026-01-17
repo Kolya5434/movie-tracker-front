@@ -98,6 +98,31 @@
   }
 }
 
+.textarea {
+  width: 100%;
+  padding: 12px;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 80px;
+
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-hover);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+
+  &::placeholder {
+    color: var(--text-dimmed);
+  }
+
+  &:focus {
+    border-color: var(--accent);
+  }
+}
+
 .error {
   color: #ff6b6b;
   font-size: 12px;

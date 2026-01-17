@@ -1,3 +1,42 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.viewToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 6px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    fill: var(--text-secondary);
+    transition: fill 0.2s;
+  }
+
+  &:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-hover);
+
+    svg {
+      fill: var(--text-primary);
+    }
+  }
+}
+
 .list {
   list-style: none;
   padding: 0;
@@ -5,6 +44,12 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
 }
 
 .swipeContainer {
@@ -71,16 +116,40 @@
   z-index: 1;
   height: 100%;
   display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: 12px;
-  padding: 0 16px;
+  padding: 0 16px 0 0;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   touch-action: pan-y;
   cursor: pointer;
   box-sizing: border-box;
+  overflow: hidden;
+}
+
+.listPoster {
+  width: 54px;
+  height: 100%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.listPosterPlaceholder {
+  width: 54px;
+  height: 100%;
+  background: var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    color: var(--text-muted);
+    opacity: 0.5;
+  }
 }
 
 .content {
@@ -101,6 +170,12 @@
 .meta {
   color: var(--text-secondary);
   font-size: 0.8rem;
+}
+
+.date {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  margin-top: 4px;
 }
 
 .rating {
@@ -124,4 +199,77 @@
   text-align: center;
   padding: 40px;
   color: var(--text-muted);
+}
+
+// Card view styles
+.cardItem {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.poster {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  display: block;
+}
+
+.posterPlaceholder {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  background: var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 48px;
+    height: 48px;
+    color: var(--text-muted);
+    opacity: 0.6;
+  }
+}
+
+.cardContent {
+  padding: 10px;
+}
+
+.cardTitle {
+  margin: 0 0 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardMeta {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.cardRating {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+
+  &.high {
+    background: var(--accent);
+  }
 }

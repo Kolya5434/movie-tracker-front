@@ -31,6 +31,10 @@ interface FormValues {
   type: MovieInsert['type']
   status: MovieInsert['status']
   rating: number | ''
+  total_episodes: number | ''
+  watched_episodes: number | ''
+  poster_url: string
+  review: string
 }
 
 export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormProps) {
@@ -49,7 +53,11 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
       title: movie?.title ?? '',
       type: movie?.type ?? 'movie',
       status: movie?.status ?? 'planned',
-      rating: movie?.rating ?? ''
+      rating: movie?.rating ?? '',
+      total_episodes: movie?.total_episodes ?? '',
+      watched_episodes: movie?.watched_episodes ?? '',
+      poster_url: movie?.poster_url ?? '',
+      review: movie?.review ?? ''
     }
   })
 
@@ -61,7 +69,11 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
       title: movie?.title ?? '',
       type: movie?.type ?? 'movie',
       status: movie?.status ?? 'planned',
-      rating: movie?.rating ?? ''
+      rating: movie?.rating ?? '',
+      total_episodes: movie?.total_episodes ?? '',
+      watched_episodes: movie?.watched_episodes ?? '',
+      poster_url: movie?.poster_url ?? '',
+      review: movie?.review ?? ''
     })
   }, [movie, reset])
 
@@ -72,7 +84,11 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
         title: data.title,
         type: data.type,
         status: data.status,
-        rating: data.rating ? Number(data.rating) : null
+        rating: data.rating ? Number(data.rating) : null,
+        total_episodes: data.total_episodes ? Number(data.total_episodes) : null,
+        watched_episodes: data.watched_episodes ? Number(data.watched_episodes) : null,
+        poster_url: data.poster_url || null,
+        review: data.review || null
       }
 
       if (isEditing) {
@@ -141,6 +157,51 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
           placeholder="0 - 10"
           {...register('rating', { min: 0, max: 10 })}
           className={classes.input}
+        />
+      </div>
+
+      {typeValue !== 'movie' && (
+        <div className={classes.row}>
+          <div className={classes.field}>
+            <label className={classes.label}>Всього серій</label>
+            <input
+              type="number"
+              min="1"
+              placeholder="12"
+              {...register('total_episodes', { min: 1 })}
+              className={classes.input}
+            />
+          </div>
+          <div className={classes.field}>
+            <label className={classes.label}>Переглянуто</label>
+            <input
+              type="number"
+              min="0"
+              placeholder="0"
+              {...register('watched_episodes', { min: 0 })}
+              className={classes.input}
+            />
+          </div>
+        </div>
+      )}
+
+      <div className={classes.field}>
+        <label className={classes.label}>Постер (URL)</label>
+        <input
+          type="url"
+          placeholder="https://..."
+          {...register('poster_url')}
+          className={classes.input}
+        />
+      </div>
+
+      <div className={classes.field}>
+        <label className={classes.label}>Нотатки</label>
+        <textarea
+          placeholder="Твої думки про фільм/серіал..."
+          {...register('review')}
+          className={classes.textarea}
+          rows={3}
         />
       </div>
 

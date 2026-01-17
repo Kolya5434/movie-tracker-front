@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect, type TouchEvent } from 'react'
 import type { Movie } from '../types/movie'
 import { STATUS_LABELS, TYPE_LABELS } from '../constants/constants'
+import type { ViewMode } from './MovieList'
 import classes from './MovieList.module.scss'
 
 interface MovieItemProps {
   movie: Movie
+  viewMode?: ViewMode
   onClick?: (movie: Movie) => void
   onEdit?: (movie: Movie) => void
   onDelete?: (movie: Movie) => void
@@ -13,12 +15,18 @@ interface MovieItemProps {
   onSwipeEnd?: () => void
 }
 
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('uk-UA', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
 const SWIPE_THRESHOLD = 60
 const FULL_SWIPE_THRESHOLD = 140
 const SWIPE_OPEN_OFFSET = 80
 
 export function MovieItem({
   movie,
+  viewMode = 'list',
   onClick,
   onEdit,
   onDelete,
@@ -108,6 +116,39 @@ export function MovieItem({
   const isFullSwipeRight = offset >= FULL_SWIPE_THRESHOLD
   const isFullSwipeLeft = offset <= -FULL_SWIPE_THRESHOLD
 
+  const showEpisodes = movie.type !== 'movie' && movie.total_episodes && movie.total_episodes > 1
+
+  // Card view
+  if (viewMode === 'card') {
+    return (
+      <li className={classes.cardItem} onClick={() => onClick?.(movie)}>
+        {movie.poster_url ? (
+          <img src={movie.poster_url} alt={movie.title} className={classes.poster} />
+        ) : (
+          <div className={classes.posterPlaceholder}>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19.5 5.5V18.5C19.5 19.0523 19.0523 19.5 18.5 19.5H5.5C4.94772 19.5 4.5 19.0523 4.5 18.5V5.5C4.5 4.94772 4.94772 4.5 5.5 4.5H18.5C19.0523 4.5 19.5 4.94772 19.5 5.5Z" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M4.5 8H7.5M4.5 12H7.5M4.5 16H7.5M16.5 8H19.5M16.5 12H19.5M16.5 16H19.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              <path d="M10 14.5L13.5 12L10 9.5V14.5Z" fill="currentColor"/>
+            </svg>
+          </div>
+        )}
+        <div className={classes.cardContent}>
+          <h3 className={classes.cardTitle}>{movie.title}</h3>
+          <div className={classes.cardMeta}>
+            {TYPE_LABELS[movie.type] || movie.type}
+          </div>
+          {movie.rating && (
+            <span className={`${classes.cardRating} ${movie.rating >= 8 ? classes.high : ''}`}>
+              {movie.rating}
+            </span>
+          )}
+        </div>
+      </li>
+    )
+  }
+
+  // List view
   return (
     <li className={classes.swipeContainer}>
       <div className={classes.backgroundActions}>
@@ -138,11 +179,24 @@ export function MovieItem({
           transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
         }}
       >
+        {movie.poster_url ? (
+          <img src={movie.poster_url} alt="" className={classes.listPoster} />
+        ) : (
+          <div className={classes.listPosterPlaceholder}>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19.5 5.5V18.5C19.5 19.0523 19.0523 19.5 18.5 19.5H5.5C4.94772 19.5 4.5 19.0523 4.5 18.5V5.5C4.5 4.94772 4.94772 4.5 5.5 4.5H18.5C19.0523 4.5 19.5 4.94772 19.5 5.5Z" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M4.5 8H7.5M4.5 12H7.5M4.5 16H7.5M16.5 8H19.5M16.5 12H19.5M16.5 16H19.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              <path d="M10 14.5L13.5 12L10 9.5V14.5Z" fill="currentColor"/>
+            </svg>
+          </div>
+        )}
         <div className={classes.content}>
           <h3 className={classes.title}>{movie.title}</h3>
           <div className={classes.meta}>
             {TYPE_LABELS[movie.type] || movie.type} • {STATUS_LABELS[movie.status] || movie.status}
+            {showEpisodes && ` • ${movie.watched_episodes ?? 0}/${movie.total_episodes}`}
           </div>
+          <div className={classes.date}>{formatDate(movie.created_at)}</div>
         </div>
 
         <div className={classes.actions}>
