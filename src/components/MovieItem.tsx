@@ -136,8 +136,9 @@ export function MovieItem({
         <div className={classes.cardContent}>
           <h3 className={classes.cardTitle}>{movie.title}</h3>
           <div className={classes.cardMeta}>
-            {TYPE_LABELS[movie.type] || movie.type}
+            {TYPE_LABELS[movie.type] || movie.type} • {STATUS_LABELS[movie.status] || movie.status}
           </div>
+          <div className={classes.cardDate}>{formatDate(movie.created_at)}</div>
           {movie.rating && (
             <span className={`${classes.cardRating} ${movie.rating >= 8 ? classes.high : ''}`}>
               {movie.rating}
