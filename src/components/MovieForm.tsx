@@ -66,7 +66,7 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
     }
   })
 
-  const typeValue = watch('type')
+  const typeValue = watch('type') as MovieType
   const statusValue = watch('status')
 
   useEffect(() => {
@@ -165,7 +165,7 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
         />
       </div>
 
-      {typeValue !== 'movie' && (
+      {typeValue === 'series' && (
         <div className={classes.row}>
           <div className={classes.field}>
             <label className={classes.label}>Всього серій</label>
