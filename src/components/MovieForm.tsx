@@ -2,14 +2,19 @@ import { useForm, type SubmitHandler } from 'react-hook-form'
 import { addMovie, type MovieInsert } from '../utils/addMovie'
 import { updateMovie } from '../utils/updateMovie'
 import { useState, useEffect } from 'react'
-import type { Movie } from '../types/movie'
+import type { Movie, MovieType } from '../types/movie'
 import { CustomSelect } from './CustomSelect'
 import classes from './MovieForm.module.scss'
 
-const TYPE_OPTIONS = [
+interface ITypeOption {
+  value: MovieType;
+  label: string
+}
+
+const TYPE_OPTIONS: ITypeOption[] = [
   { value: 'movie', label: 'Фільм' },
   { value: 'series', label: 'Серіал' },
-  { value: 'anime', label: 'Аніме' }
+  { value: 'cartoon', label: 'Мультфільм' }
 ]
 
 const STATUS_OPTIONS = [
