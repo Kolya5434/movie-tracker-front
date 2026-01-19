@@ -1,7 +1,9 @@
-export const TYPE_LABELS: Record<string, string> = {
+import type {MovieType} from "../types/movie.ts";
+
+export const TYPE_LABELS: Record<MovieType, string> = {
   movie: 'Фільм',
   series: 'Серіал',
-  anime: 'Аніме'
+  cartoon: 'Мультфільм'
 }
 
 export const STATUS_LABELS: Record<string, string> = {
