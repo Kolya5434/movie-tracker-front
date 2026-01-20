@@ -45,6 +45,7 @@ function App() {
   const [moviePromise, setMoviePromise] = useState(() => fetchMovies())
   const [editingMovie, setEditingMovie] = useState<Movie | null>(null)
   const [currentView, setCurrentView] = useState<View>('home')
+  const [previousView, setPreviousView] = useState<View>('home')
   const [filters, setFilters] = useState<MovieFilters>({})
   const [movieToDelete, setMovieToDelete] = useState<Movie | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -64,6 +65,7 @@ function App() {
 
   const handleEditFromDetails = () => {
     if (viewingMovie) {
+      setPreviousView(currentView)
       setEditingMovie(viewingMovie)
       setViewingMovie(null)
       setCurrentView('add')
@@ -76,7 +78,7 @@ function App() {
 
   const handleFormSuccess = () => {
     setEditingMovie(null)
-    setCurrentView('home')
+    setCurrentView(previousView)
     refreshMovies()
   }
 
@@ -86,6 +88,7 @@ function App() {
   }
 
   const handleAddClick = () => {
+    setPreviousView(currentView)
     setEditingMovie(null)
     setCurrentView('add')
   }
