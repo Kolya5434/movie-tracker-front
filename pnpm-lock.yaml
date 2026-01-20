@@ -27,6 +27,9 @@ importers:
       '@eslint/js':
         specifier: ^9.39.2
         version: 9.39.2
+      '@rslint/tsgo':
+        specifier: ^0.2.0
+        version: 0.2.0
       '@types/node':
         specifier: ^25.0.9
         version: 25.0.9
@@ -581,6 +584,40 @@ packages:
     resolution: {integrity: sha512-xNO+fksQhsAckRtDSPWaMeT1uIM+JrDRXlerpnWNXhn1TdB3YZ6uKBMBTKP0eX9XtYEP978hHk1f8332i2AW8Q==}
     cpu: [x64]
     os: [win32]
+
+  '@rslint/tsgo-darwin-arm64@0.2.0':
+    resolution: {integrity: sha512-32tKhUDaNjW1bwOXvbTDXW8e0cdbXXRjsXw9lJZFOyX24OWztyhMidRiB5t4Rv+gcHXPuu+eUqRUjwnGjdLNPQ==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@rslint/tsgo-darwin-x64@0.2.0':
+    resolution: {integrity: sha512-mWcw7e0PU83uuskKwIK9jnMxp3RpzifSgQ5QihWTJWgeLQ31BAedM7BsiCwnZB+C7ubOlmd1ut0z71O6DZR1qg==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@rslint/tsgo-linux-arm64@0.2.0':
+    resolution: {integrity: sha512-36BIp2mBRfDWp6WQeb3G3xpSko6OQssMkD4VzQX7ckcQ+1zKTgbn8N/qgXO0CGmFoXXVAdCD1JKNd54oXmVOTg==}
+    cpu: [arm64]
+    os: [linux]
+
+  '@rslint/tsgo-linux-x64@0.2.0':
+    resolution: {integrity: sha512-XnjHTp7w+j7VTKbN+UWIiFq1wCqALGA0gzuMDAUSbViSmAK1uq3lVeuZLYe3lNHsm6lHNILTGoPDJ5B8a5Q8Xg==}
+    cpu: [x64]
+    os: [linux]
+
+  '@rslint/tsgo-win32-arm64@0.2.0':
+    resolution: {integrity: sha512-4X0OamB1SD4Kj5iXjlOxh88BrRI1TqyxA7cYoS/F3qkNV+r3h3R0IZoaerLdahinh3IRKENDr2PP5aohmJQZBw==}
+    cpu: [arm64]
+    os: [win32]
+
+  '@rslint/tsgo-win32-x64@0.2.0':
+    resolution: {integrity: sha512-pYLKkncJrBC/ywIaHetDGlIkhL95Vpo/N4ca6evSMhymMqBAdZPq5bdzKEkcPur3XoLpB8vjQ8ZlJLREbaP2Aw==}
+    cpu: [x64]
+    os: [win32]
+
+  '@rslint/tsgo@0.2.0':
+    resolution: {integrity: sha512-BftVxfQk/4FRVymVQ27fieP/w/bglsnAnLSet3+S1eHd7SoU6LhriApbqW1/ifOlPu2D2YJrqaiQmYQPSLWJ/g==}
+    hasBin: true
 
   '@supabase/auth-js@2.90.1':
     resolution: {integrity: sha512-vxb66dgo6h3yyPbR06735Ps+dK3hj0JwS8w9fdQPVZQmocSTlKUW5MfxSy99mN0XqCCuLMQ3jCEiIIUU23e9ng==}
@@ -1734,6 +1771,33 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.55.2':
     optional: true
+
+  '@rslint/tsgo-darwin-arm64@0.2.0':
+    optional: true
+
+  '@rslint/tsgo-darwin-x64@0.2.0':
+    optional: true
+
+  '@rslint/tsgo-linux-arm64@0.2.0':
+    optional: true
+
+  '@rslint/tsgo-linux-x64@0.2.0':
+    optional: true
+
+  '@rslint/tsgo-win32-arm64@0.2.0':
+    optional: true
+
+  '@rslint/tsgo-win32-x64@0.2.0':
+    optional: true
+
+  '@rslint/tsgo@0.2.0':
+    optionalDependencies:
+      '@rslint/tsgo-darwin-arm64': 0.2.0
+      '@rslint/tsgo-darwin-x64': 0.2.0
+      '@rslint/tsgo-linux-arm64': 0.2.0
+      '@rslint/tsgo-linux-x64': 0.2.0
+      '@rslint/tsgo-win32-arm64': 0.2.0
+      '@rslint/tsgo-win32-x64': 0.2.0
 
   '@supabase/auth-js@2.90.1':
     dependencies:
