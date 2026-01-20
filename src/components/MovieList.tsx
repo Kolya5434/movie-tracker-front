@@ -22,6 +22,7 @@ export interface MovieFilters {
   search?: string
   sortBy?: SortField
   sortOrder?: SortOrder
+  favoritesOnly?: boolean
 }
 
 interface MovieListProps {
@@ -73,6 +74,7 @@ export function MovieList({ moviePromise, onMovieClick, onEdit, onDelete, limit,
 
   if (filters?.type) filtered = filtered.filter(m => m.type === filters.type)
   if (filters?.status) filtered = filtered.filter(m => m.status === filters.status)
+  if (filters?.favoritesOnly) filtered = filtered.filter(m => m.is_favorite)
   if (filters?.ratingRange) {
     const [min, max] = filters.ratingRange
     filtered = filtered.filter(m => (m.rating ?? 0) >= min && (m.rating ?? 0) <= max)

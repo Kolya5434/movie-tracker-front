@@ -310,11 +310,13 @@ export function MovieItem({
   if (viewMode === 'card') {
     return (
       <li className={classes.cardItem} onClick={() => onClick?.(movie)}>
+        {movie.is_favorite && <span className={classes.favoriteIcon}>❤️</span>}
         {renderCardPoster()}
         <div className={classes.cardContent}>
           <h3 className={classes.cardTitle}>{movie.title}</h3>
           <div className={classes.cardMeta}>
             {TYPE_LABELS[movie.type] || movie.type} • {STATUS_LABELS[movie.status] || movie.status}
+            {movie.year && ` • ${movie.year}`}
           </div>
           <div className={classes.cardDate}>{formatDate(movie.created_at)}</div>
           {(movie.rating || movie.tmdb_rating) && (

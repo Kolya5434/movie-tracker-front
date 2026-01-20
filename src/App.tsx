@@ -1,6 +1,7 @@
-import { Suspense, useState } from 'react'
+import { Suspense, useState, useMemo } from 'react'
 import { fetchMovies } from './utils/getMovies.ts'
 import { deleteMovie } from './utils/deleteMovie.ts'
+import { getUpcomingEpisodes } from './utils/getUpcomingEpisodes.ts'
 import { MovieForm } from './components/MovieForm.tsx'
 import { MovieList, type MovieFilters, type SortField, type SortOrder } from './components/MovieList.tsx'
 import { ConfirmModal } from './components/ConfirmModal.tsx'
@@ -10,6 +11,7 @@ import { Header } from './components/Header.tsx'
 import { MobileNav } from './components/MobileNav.tsx'
 import { Stats } from './components/Stats.tsx'
 import { MovieDetails } from './components/MovieDetails.tsx'
+import { UpcomingEpisodes } from './components/UpcomingEpisodes.tsx'
 import { useTheme } from './hooks/useTheme.ts'
 import { TYPE_LABELS, STATUS_LABELS } from './constants/constants.ts'
 import type { Movie } from './types/movie.ts'
@@ -22,11 +24,6 @@ const DEFAULT_FILTER_VALUES: FilterValues = {
 const TYPE_OPTIONS: SelectOption[] = [
   { value: '', label: 'Усі типи' },
   ...Object.entries(TYPE_LABELS).map(([value, label]) => ({ value, label }))
-]
-
-const STATUS_OPTIONS: SelectOption[] = [
-  { value: '', label: 'Усі статуси' },
-  ...Object.entries(STATUS_LABELS).map(([value, label]) => ({ value, label }))
 ]
 
 const SORT_OPTIONS: SelectOption[] = [
@@ -54,6 +51,12 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [sortValue, setSortValue] = useState('created_at:desc')
   const [viewingMovie, setViewingMovie] = useState<Movie | null>(null)
+
+  // Promise для нагадувань про нові епізоди
+  const episodesPromise = useMemo(
+    () => moviePromise.then(movies => getUpcomingEpisodes(movies)),
+    [moviePromise]
+  )
 
   const refreshMovies = () => {
     setMoviePromise(fetchMovies())
@@ -219,20 +222,26 @@ function App() {
 
         <div className={classes.tabs}>
           <button
-            className={`${classes.tab} ${!filters.status ? classes.activeTab : ''}`}
-            onClick={() => setFilters(f => ({ ...f, status: undefined }))}
+            className={`${classes.tab} ${!filters.status && !filters.favoritesOnly ? classes.activeTab : ''}`}
+            onClick={() => setFilters(f => ({ ...f, status: undefined, favoritesOnly: undefined }))}
           >
             Усі
           </button>
           {Object.entries(STATUS_LABELS).map(([value, label]) => (
             <button
               key={value}
-              className={`${classes.tab} ${filters.status === value ? classes.activeTab : ''}`}
-              onClick={() => setFilters(f => ({ ...f, status: value }))}
+              className={`${classes.tab} ${filters.status === value && !filters.favoritesOnly ? classes.activeTab : ''}`}
+              onClick={() => setFilters(f => ({ ...f, status: value, favoritesOnly: undefined }))}
             >
               {label}
             </button>
           ))}
+          <button
+            className={`${classes.tab} ${filters.favoritesOnly ? classes.activeTab : ''}`}
+            onClick={() => setFilters(f => ({ ...f, status: undefined, favoritesOnly: true }))}
+          >
+            ❤️ Улюблені
+          </button>
         </div>
 
         <div className={classes.searchRow}>
@@ -312,6 +321,11 @@ function App() {
   return (
     <div className={classes.app}>
       <Header currentView={currentView} onNavigate={handleNavigate} theme={theme} onThemeToggle={toggleTheme} />
+
+      <Suspense fallback={null}>
+        <UpcomingEpisodes episodesPromise={episodesPromise} />
+      </Suspense>
+
       <header className={classes.pageHeader}>
         <h1 className={classes.pageTitle}>Останні додані</h1>
         <button className={classes.linkButton} onClick={handleViewAll}>

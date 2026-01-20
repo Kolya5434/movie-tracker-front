@@ -134,6 +134,26 @@
   font-size: 12px;
 }
 
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+
+  input {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  span {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+  }
+}
+
 .button {
   width: 100%;
   height: 44px;

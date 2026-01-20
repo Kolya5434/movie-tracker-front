@@ -18,6 +18,19 @@ interface TMDBResult {
   first_air_date?: string
   poster_path?: string | null
   vote_average?: number
+  genre_ids?: number[]
+}
+
+// Маппінг TMDB genre IDs до назв
+const GENRE_MAP: Record<number, string> = {
+  28: 'Бойовик', 12: 'Пригоди', 16: 'Анімація', 35: 'Комедія',
+  80: 'Кримінал', 99: 'Документальний', 18: 'Драма', 10751: 'Сімейний',
+  14: 'Фентезі', 36: 'Історичний', 27: 'Жахи', 10402: 'Музика',
+  9648: 'Детектив', 10749: 'Мелодрама', 878: 'Фантастика', 10770: 'Телефільм',
+  53: 'Трилер', 10752: 'Військовий', 37: 'Вестерн',
+  10759: 'Бойовик і Пригоди', 10762: 'Дитячий', 10763: 'Новини',
+  10764: 'Реаліті', 10765: 'Фантастика і Фентезі', 10766: 'Мильна опера',
+  10767: 'Ток-шоу', 10768: 'Війна і Політика'
 }
 
 interface TMDBSearchResult {
@@ -29,6 +42,7 @@ interface TMDBSearchResult {
   mediaType: 'movie' | 'tv'
   posterPath: string | null
   tmdbRating: number | null
+  genres: string[]
 }
 
 async function searchTMDB(query: string): Promise<TMDBSearchResult[]> {
@@ -63,6 +77,10 @@ async function searchTMDB(query: string): Promise<TMDBSearchResult[]> {
         const dateStr = ukItem.release_date || ukItem.first_air_date || ''
         const year = dateStr ? dateStr.substring(0, 4) : ''
 
+        const genres = (ukItem.genre_ids || [])
+          .map(id => GENRE_MAP[id])
+          .filter(Boolean)
+
         return {
           tmdbId: ukItem.id,
           ukTitle,
@@ -70,8 +88,9 @@ async function searchTMDB(query: string): Promise<TMDBSearchResult[]> {
           enTitle,
           year,
           mediaType: ukItem.media_type as 'movie' | 'tv',
-          posterPath: ukItem.poster_path,
-          tmdbRating: ukItem.vote_average ?? null
+          posterPath: ukItem.poster_path ?? null,
+          tmdbRating: ukItem.vote_average ?? null,
+          genres
         }
       })
 
@@ -118,6 +137,10 @@ interface FormValues {
   review: string
   tmdb_id: number | null
   tmdb_rating: number | null
+  is_favorite: boolean
+  watched_at: string
+  year: number | null
+  genres: string[] | null
 }
 
 export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormProps) {
@@ -148,7 +171,11 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
       poster_url: movie?.poster_url ?? '',
       review: movie?.review ?? '',
       tmdb_id: movie?.tmdb_id ?? null,
-      tmdb_rating: movie?.tmdb_rating ?? null
+      tmdb_rating: movie?.tmdb_rating ?? null,
+      is_favorite: movie?.is_favorite ?? false,
+      watched_at: movie?.watched_at ?? '',
+      year: movie?.year ?? null,
+      genres: movie?.genres ?? null
     }
   })
 
@@ -213,6 +240,8 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
     // Зберігаємо TMDB дані
     setValue('tmdb_id', result.tmdbId)
     setValue('tmdb_rating', result.tmdbRating)
+    setValue('year', result.year ? parseInt(result.year) : null)
+    setValue('genres', result.genres.length > 0 ? result.genres : null)
 
     setShowDropdown(false)
     setSearchResults([])
@@ -232,7 +261,11 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
       poster_url: movie?.poster_url ?? '',
       review: movie?.review ?? '',
       tmdb_id: movie?.tmdb_id ?? null,
-      tmdb_rating: movie?.tmdb_rating ?? null
+      tmdb_rating: movie?.tmdb_rating ?? null,
+      is_favorite: movie?.is_favorite ?? false,
+      watched_at: movie?.watched_at ?? '',
+      year: movie?.year ?? null,
+      genres: movie?.genres ?? null
     })
     setUserTyping(false)
     setShowDropdown(false)
@@ -252,7 +285,11 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
         poster_url: data.poster_url || null,
         review: data.review || null,
         tmdb_id: data.tmdb_id,
-        tmdb_rating: data.tmdb_rating
+        tmdb_rating: data.tmdb_rating,
+        is_favorite: data.is_favorite,
+        watched_at: data.watched_at || null,
+        year: data.year,
+        genres: data.genres
       }
 
       if (isEditing) {
@@ -352,18 +389,37 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
         </div>
       </div>
 
-      <div className={classes.field}>
-        <label className={classes.label}>Оцінка</label>
-        <input
-          type="number"
-          step="0.1"
-          min="0"
-          max="10"
-          placeholder="0 - 10"
-          {...register('rating', { min: 0, max: 10 })}
-          className={classes.input}
-        />
+      <div className={classes.row}>
+        <div className={classes.field}>
+          <label className={classes.label}>Оцінка</label>
+          <input
+            type="number"
+            step="0.1"
+            min="0"
+            max="10"
+            placeholder="0 - 10"
+            {...register('rating', { min: 0, max: 10 })}
+            className={classes.input}
+          />
+        </div>
+
+        <div className={classes.field}>
+          <label className={classes.label}>Дата перегляду</label>
+          <input
+            type="date"
+            {...register('watched_at')}
+            className={classes.input}
+          />
+        </div>
       </div>
+
+      <label className={classes.checkbox}>
+        <input
+          type="checkbox"
+          {...register('is_favorite')}
+        />
+        <span>Улюблене</span>
+      </label>
 
       {typeValue === 'series' && (
         <div className={classes.row}>

@@ -34,13 +34,20 @@ export function MovieDetails({ movie, onEdit, onClose }: MovieDetailsProps) {
   const [recommendations, setRecommendations] = useState<TMDBRecommendation[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  // Блокуємо скрол body
+  // Блокуємо скрол body та Escape для закриття
   useEffect(() => {
     document.body.style.overflow = 'hidden'
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handleEscape)
+
     return () => {
       document.body.style.overflow = ''
+      document.removeEventListener('keydown', handleEscape)
     }
-  }, [])
+  }, [onClose])
 
   useEffect(() => {
     async function fetchDetails() {
