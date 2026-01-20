@@ -34,6 +34,14 @@ export function MovieDetails({ movie, onEdit, onClose }: MovieDetailsProps) {
   const [recommendations, setRecommendations] = useState<TMDBRecommendation[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
+  // Блокуємо скрол body
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [])
+
   useEffect(() => {
     async function fetchDetails() {
       if (!movie.title) {
