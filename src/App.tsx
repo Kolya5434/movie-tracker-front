@@ -2,12 +2,14 @@ import { Suspense, useState } from 'react'
 import { fetchMovies } from './utils/getMovies.ts'
 import { deleteMovie } from './utils/deleteMovie.ts'
 import { MovieForm } from './components/MovieForm.tsx'
-import { MovieList, type MovieFilters } from './components/MovieList.tsx'
+import { MovieList, type MovieFilters, type SortField, type SortOrder } from './components/MovieList.tsx'
 import { ConfirmModal } from './components/ConfirmModal.tsx'
 import { FilterDrawer, type FilterValues } from './components/FilterDrawer.tsx'
 import { CustomSelect, type SelectOption } from './components/CustomSelect.tsx'
 import { Header } from './components/Header.tsx'
 import { MobileNav } from './components/MobileNav.tsx'
+import { Stats } from './components/Stats.tsx'
+import { MovieDetails } from './components/MovieDetails.tsx'
 import { useTheme } from './hooks/useTheme.ts'
 import { TYPE_LABELS, STATUS_LABELS } from './constants/constants.ts'
 import type { Movie } from './types/movie.ts'
@@ -27,6 +29,15 @@ const STATUS_OPTIONS: SelectOption[] = [
   ...Object.entries(STATUS_LABELS).map(([value, label]) => ({ value, label }))
 ]
 
+const SORT_OPTIONS: SelectOption[] = [
+  { value: 'created_at:desc', label: 'Спочатку нові' },
+  { value: 'created_at:asc', label: 'Спочатку старі' },
+  { value: 'rating:desc', label: 'Високий рейтинг' },
+  { value: 'rating:asc', label: 'Низький рейтинг' },
+  { value: 'title:asc', label: 'А → Я' },
+  { value: 'title:desc', label: 'Я → А' }
+]
+
 type View = 'home' | 'add' | 'all'
 
 function App() {
@@ -39,14 +50,28 @@ function App() {
   const [isDeleting, setIsDeleting] = useState(false)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [filterValues, setFilterValues] = useState<FilterValues>(DEFAULT_FILTER_VALUES)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortValue, setSortValue] = useState('created_at:desc')
+  const [viewingMovie, setViewingMovie] = useState<Movie | null>(null)
 
   const refreshMovies = () => {
     setMoviePromise(fetchMovies())
   }
 
   const handleMovieClick = (movie: Movie) => {
-    setEditingMovie(movie)
-    setCurrentView('add')
+    setViewingMovie(movie)
+  }
+
+  const handleEditFromDetails = () => {
+    if (viewingMovie) {
+      setEditingMovie(viewingMovie)
+      setViewingMovie(null)
+      setCurrentView('add')
+    }
+  }
+
+  const handleCloseDetails = () => {
+    setViewingMovie(null)
   }
 
   const handleFormSuccess = () => {
@@ -66,15 +91,30 @@ function App() {
   }
 
   const handleViewAll = () => {
-    setFilters({})
+    setFilters({ sortBy: 'created_at', sortOrder: 'desc' })
     setFilterValues(DEFAULT_FILTER_VALUES)
+    setSearchQuery('')
+    setSortValue('created_at:desc')
     setCurrentView('all')
   }
 
   const handleBackHome = () => {
     setFilters({})
     setFilterValues(DEFAULT_FILTER_VALUES)
+    setSearchQuery('')
+    setSortValue('created_at:desc')
     setCurrentView('home')
+  }
+
+  const handleSortChange = (value: string) => {
+    setSortValue(value)
+    const [sortBy, sortOrder] = value.split(':') as [SortField, SortOrder]
+    setFilters(f => ({ ...f, sortBy, sortOrder }))
+  }
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value)
+    setFilters(f => ({ ...f, search: value || undefined }))
   }
 
   const handleNavigate = (view: View) => {
@@ -170,6 +210,38 @@ function App() {
           <h1 className={classes.pageTitle}>Усі записи</h1>
         </header>
 
+        <Suspense fallback={null}>
+          <Stats moviePromise={moviePromise} />
+        </Suspense>
+
+        <div className={classes.tabs}>
+          <button
+            className={`${classes.tab} ${!filters.status ? classes.activeTab : ''}`}
+            onClick={() => setFilters(f => ({ ...f, status: undefined }))}
+          >
+            Усі
+          </button>
+          {Object.entries(STATUS_LABELS).map(([value, label]) => (
+            <button
+              key={value}
+              className={`${classes.tab} ${filters.status === value ? classes.activeTab : ''}`}
+              onClick={() => setFilters(f => ({ ...f, status: value }))}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div className={classes.searchRow}>
+          <input
+            type="text"
+            placeholder="Пошук по назві..."
+            value={searchQuery}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className={classes.searchInput}
+          />
+        </div>
+
         <div className={classes.filters}>
           <CustomSelect
             options={TYPE_OPTIONS}
@@ -179,9 +251,9 @@ function App() {
           />
 
           <CustomSelect
-            options={STATUS_OPTIONS}
-            value={filters.status || ''}
-            onChange={(value) => setFilters(f => ({ ...f, status: value || undefined }))}
+            options={SORT_OPTIONS}
+            value={sortValue}
+            onChange={handleSortChange}
             className={classes.filterSelect}
           />
 
@@ -211,6 +283,14 @@ function App() {
           onChange={handleFilterValuesChange}
           onReset={handleFilterReset}
         />
+
+        {viewingMovie && (
+          <MovieDetails
+            movie={viewingMovie}
+            onEdit={handleEditFromDetails}
+            onClose={handleCloseDetails}
+          />
+        )}
 
         <ConfirmModal
           isOpen={!!movieToDelete}
@@ -245,6 +325,14 @@ function App() {
           limit={6}
         />
       </Suspense>
+
+      {viewingMovie && (
+        <MovieDetails
+          movie={viewingMovie}
+          onEdit={handleEditFromDetails}
+          onClose={handleCloseDetails}
+        />
+      )}
 
       <ConfirmModal
         isOpen={!!movieToDelete}

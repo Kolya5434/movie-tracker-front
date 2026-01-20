@@ -11,4 +11,6 @@ export type Movie = Omit<Tables<'movies'>, 'type' | 'status' | 'created_at'> & {
   watched_episodes: number | null;
   poster_url: string | null;
   review: string | null;
+  tmdb_id: number | null;
+  tmdb_rating: number | null;
 };

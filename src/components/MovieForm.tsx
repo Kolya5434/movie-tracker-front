@@ -17,15 +17,18 @@ interface TMDBResult {
   release_date?: string
   first_air_date?: string
   poster_path?: string | null
+  vote_average?: number
 }
 
 interface TMDBSearchResult {
+  tmdbId: number
   ukTitle: string
   ruTitle: string
   enTitle: string
   year: string
   mediaType: 'movie' | 'tv'
   posterPath: string | null
+  tmdbRating: number | null
 }
 
 async function searchTMDB(query: string): Promise<TMDBSearchResult[]> {
@@ -61,12 +64,14 @@ async function searchTMDB(query: string): Promise<TMDBSearchResult[]> {
         const year = dateStr ? dateStr.substring(0, 4) : ''
 
         return {
+          tmdbId: ukItem.id,
           ukTitle,
           ruTitle,
           enTitle,
           year,
           mediaType: ukItem.media_type as 'movie' | 'tv',
-          posterPath: ukItem.poster_path
+          posterPath: ukItem.poster_path,
+          tmdbRating: ukItem.vote_average ?? null
         }
       })
 
@@ -111,6 +116,8 @@ interface FormValues {
   watched_episodes: number | ''
   poster_url: string
   review: string
+  tmdb_id: number | null
+  tmdb_rating: number | null
 }
 
 export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormProps) {
@@ -139,7 +146,9 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
       total_episodes: movie?.total_episodes ?? '',
       watched_episodes: movie?.watched_episodes ?? '',
       poster_url: movie?.poster_url ?? '',
-      review: movie?.review ?? ''
+      review: movie?.review ?? '',
+      tmdb_id: movie?.tmdb_id ?? null,
+      tmdb_rating: movie?.tmdb_rating ?? null
     }
   })
 
@@ -201,6 +210,10 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
       setValue('poster_url', `https://image.tmdb.org/t/p/w500${result.posterPath}`)
     }
 
+    // Зберігаємо TMDB дані
+    setValue('tmdb_id', result.tmdbId)
+    setValue('tmdb_rating', result.tmdbRating)
+
     setShowDropdown(false)
     setSearchResults([])
     setUserTyping(false)
@@ -217,7 +230,9 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
       total_episodes: movie?.total_episodes ?? '',
       watched_episodes: movie?.watched_episodes ?? '',
       poster_url: movie?.poster_url ?? '',
-      review: movie?.review ?? ''
+      review: movie?.review ?? '',
+      tmdb_id: movie?.tmdb_id ?? null,
+      tmdb_rating: movie?.tmdb_rating ?? null
     })
     setUserTyping(false)
     setShowDropdown(false)
@@ -235,7 +250,9 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
         total_episodes: data.total_episodes ? Number(data.total_episodes) : null,
         watched_episodes: data.watched_episodes ? Number(data.watched_episodes) : null,
         poster_url: data.poster_url || null,
-        review: data.review || null
+        review: data.review || null,
+        tmdb_id: data.tmdb_id,
+        tmdb_rating: data.tmdb_rating
       }
 
       if (isEditing) {

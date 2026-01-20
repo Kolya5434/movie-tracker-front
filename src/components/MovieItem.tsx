@@ -317,10 +317,19 @@ export function MovieItem({
             {TYPE_LABELS[movie.type] || movie.type} • {STATUS_LABELS[movie.status] || movie.status}
           </div>
           <div className={classes.cardDate}>{formatDate(movie.created_at)}</div>
-          {movie.rating && (
-            <span className={`${classes.cardRating} ${movie.rating >= 8 ? classes.high : ''}`}>
-              {movie.rating}
-            </span>
+          {(movie.rating || movie.tmdb_rating) && (
+            <div className={classes.cardRatings}>
+              {movie.rating && (
+                <span className={`${classes.cardRating} ${movie.rating >= 8 ? classes.high : ''}`}>
+                  ★ {movie.rating}
+                </span>
+              )}
+              {movie.tmdb_rating && (
+                <span className={classes.cardTmdbRating}>
+                  {movie.tmdb_rating.toFixed(1)}
+                </span>
+              )}
+            </div>
           )}
         </div>
       </li>

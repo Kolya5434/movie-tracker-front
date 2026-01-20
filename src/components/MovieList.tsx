@@ -12,10 +12,16 @@ function getStoredViewMode(): ViewMode {
   return stored === 'card' ? 'card' : 'list'
 }
 
+export type SortField = 'created_at' | 'rating' | 'title'
+export type SortOrder = 'asc' | 'desc'
+
 export interface MovieFilters {
   type?: string
   status?: string
   ratingRange?: [number, number]
+  search?: string
+  sortBy?: SortField
+  sortOrder?: SortOrder
 }
 
 interface MovieListProps {
@@ -58,11 +64,34 @@ export function MovieList({ moviePromise, onMovieClick, onEdit, onDelete, limit,
   }
 
   let filtered = allMovies
+
+  // Пошук по назві
+  if (filters?.search) {
+    const searchLower = filters.search.toLowerCase()
+    filtered = filtered.filter(m => m.title.toLowerCase().includes(searchLower))
+  }
+
   if (filters?.type) filtered = filtered.filter(m => m.type === filters.type)
   if (filters?.status) filtered = filtered.filter(m => m.status === filters.status)
   if (filters?.ratingRange) {
     const [min, max] = filters.ratingRange
     filtered = filtered.filter(m => (m.rating ?? 0) >= min && (m.rating ?? 0) <= max)
+  }
+
+  // Сортування
+  if (filters?.sortBy) {
+    const order = filters.sortOrder === 'asc' ? 1 : -1
+    filtered = [...filtered].sort((a, b) => {
+      switch (filters.sortBy) {
+        case 'title':
+          return a.title.localeCompare(b.title, 'uk') * order
+        case 'rating':
+          return ((a.rating ?? 0) - (b.rating ?? 0)) * order
+        case 'created_at':
+        default:
+          return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * order
+      }
+    })
   }
 
   if (filtered.length === 0) {
