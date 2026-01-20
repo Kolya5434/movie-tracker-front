@@ -1,10 +1,81 @@
 import { useForm, type SubmitHandler } from 'react-hook-form'
 import { addMovie, type MovieInsert } from '../utils/addMovie'
 import { updateMovie } from '../utils/updateMovie'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { Movie, MovieType } from '../types/movie'
 import { CustomSelect } from './CustomSelect'
+import { tmdbAPIKey } from '../environment'
 import classes from './MovieForm.module.scss'
+
+interface TMDBResult {
+  id: number
+  title?: string  // for movies
+  name?: string   // for tv
+  original_title?: string
+  original_name?: string
+  media_type: 'movie' | 'tv' | 'person'
+  release_date?: string
+  first_air_date?: string
+  poster_path?: string | null
+}
+
+interface TMDBSearchResult {
+  ukTitle: string
+  ruTitle: string
+  enTitle: string
+  year: string
+  mediaType: 'movie' | 'tv'
+  posterPath: string | null
+}
+
+async function searchTMDB(query: string): Promise<TMDBSearchResult[]> {
+  if (!query || query.length < 3) return []
+
+  try {
+    // Паралельно шукаємо з різними мовами
+    const [ukRes, ruRes, enRes] = await Promise.all([
+      fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbAPIKey}&query=${encodeURIComponent(query)}&language=uk-UA`),
+      fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbAPIKey}&query=${encodeURIComponent(query)}&language=ru-RU`),
+      fetch(`https://api.themoviedb.org/3/search/multi?api_key=${tmdbAPIKey}&query=${encodeURIComponent(query)}&language=en-US`)
+    ])
+
+    const [ukData, ruData, enData] = await Promise.all([ukRes.json(), ruRes.json(), enRes.json()])
+
+    const ukResults: TMDBResult[] = ukData.results || []
+    const ruResults: TMDBResult[] = ruData.results || []
+    const enResults: TMDBResult[] = enData.results || []
+
+    // Об'єднуємо результати по ID
+    const combined: TMDBSearchResult[] = ukResults
+      .filter(r => r.media_type === 'movie' || r.media_type === 'tv')
+      .slice(0, 8)
+      .map(ukItem => {
+        const ruItem = ruResults.find(r => r.id === ukItem.id)
+        const enItem = enResults.find(r => r.id === ukItem.id)
+
+        const ukTitle = ukItem.title || ukItem.name || ''
+        const ruTitle = ruItem?.title || ruItem?.name || ukTitle
+        const enTitle = enItem?.title || enItem?.name || ukItem.original_title || ukItem.original_name || ''
+
+        const dateStr = ukItem.release_date || ukItem.first_air_date || ''
+        const year = dateStr ? dateStr.substring(0, 4) : ''
+
+        return {
+          ukTitle,
+          ruTitle,
+          enTitle,
+          year,
+          mediaType: ukItem.media_type as 'movie' | 'tv',
+          posterPath: ukItem.poster_path
+        }
+      })
+
+    return combined
+  } catch (error) {
+    console.error('TMDB search error:', error)
+    return []
+  }
+}
 
 interface ITypeOption {
   value: MovieType;
@@ -44,6 +115,12 @@ interface FormValues {
 
 export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [searchResults, setSearchResults] = useState<TMDBSearchResult[]>([])
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [isSearching, setIsSearching] = useState(false)
+  const [userTyping, setUserTyping] = useState(false)
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
   const isEditing = !!movie
 
   const {
@@ -68,6 +145,68 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
 
   const typeValue = watch('type') as MovieType
   const statusValue = watch('status')
+  const titleValue = watch('title')
+
+  // Debounced search - only when user is typing
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
+
+    if (!userTyping || !titleValue || titleValue.length < 3) {
+      setSearchResults([])
+      setShowDropdown(false)
+      return
+    }
+
+    setIsSearching(true)
+    searchTimeoutRef.current = setTimeout(async () => {
+      const results = await searchTMDB(titleValue)
+      setSearchResults(results)
+      setShowDropdown(results.length > 0)
+      setIsSearching(false)
+    }, 400)
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current)
+      }
+    }
+  }, [titleValue, userTyping])
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleSelectResult = (result: TMDBSearchResult, titleType: 'uk' | 'ru' | 'en') => {
+    const selectedTitle = titleType === 'uk' ? result.ukTitle : titleType === 'ru' ? result.ruTitle : result.enTitle
+    setValue('title', selectedTitle)
+
+    // Автоматично встановлюємо тип
+    if (result.mediaType === 'tv') {
+      setValue('type', 'series')
+    } else {
+      setValue('type', 'movie')
+    }
+
+    // Встановлюємо постер
+    if (result.posterPath) {
+      setValue('poster_url', `https://image.tmdb.org/t/p/w500${result.posterPath}`)
+    }
+
+    setShowDropdown(false)
+    setSearchResults([])
+    setUserTyping(false)
+  }
+
+  const posterUrlValue = watch('poster_url')
 
   useEffect(() => {
     reset({
@@ -80,6 +219,9 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
       poster_url: movie?.poster_url ?? '',
       review: movie?.review ?? ''
     })
+    setUserTyping(false)
+    setShowDropdown(false)
+    setSearchResults([])
   }, [movie, reset])
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
@@ -101,6 +243,7 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
       } else {
         await addMovie(movieData)
         reset()
+        setUserTyping(false)
       }
 
       onSuccess()
@@ -124,11 +267,51 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
 
       <div className={classes.field}>
         <label className={classes.label}>Назва</label>
-        <input
-          {...register('title', { required: 'Назва обовʼязкова' })}
-          placeholder="Введіть назву"
-          className={classes.input}
-        />
+        <div className={classes.autocomplete} ref={dropdownRef}>
+          <input
+            {...register('title', { required: 'Назва обовʼязкова' })}
+            placeholder="Введіть назву"
+            className={classes.input}
+            autoComplete="off"
+            onInput={() => setUserTyping(true)}
+          />
+          {isSearching && <div className={classes.searchingIndicator}>...</div>}
+          {showDropdown && searchResults.length > 0 && (
+            <div className={classes.dropdown}>
+              {searchResults.map((result, index) => (
+                <div key={index} className={classes.dropdownItem}>
+                  <div className={classes.dropdownPoster}>
+                    {result.posterPath ? (
+                      <img src={`https://image.tmdb.org/t/p/w92${result.posterPath}`} alt="" />
+                    ) : (
+                      <div className={classes.noPoster}>?</div>
+                    )}
+                  </div>
+                  <div className={classes.dropdownInfo}>
+                    <div className={classes.dropdownMeta}>
+                      {result.mediaType === 'tv' ? 'Серіал' : 'Фільм'} {result.year && `• ${result.year}`}
+                    </div>
+                    <div className={classes.dropdownTitles}>
+                      <button type="button" onClick={() => handleSelectResult(result, 'uk')} className={classes.titleBtn}>
+                        🇺🇦 {result.ukTitle}
+                      </button>
+                      {result.ruTitle !== result.ukTitle && (
+                        <button type="button" onClick={() => handleSelectResult(result, 'ru')} className={classes.titleBtn}>
+                          🇷🇺 {result.ruTitle}
+                        </button>
+                      )}
+                      {result.enTitle !== result.ukTitle && result.enTitle !== result.ruTitle && (
+                        <button type="button" onClick={() => handleSelectResult(result, 'en')} className={classes.titleBtn}>
+                          🇬🇧 {result.enTitle}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         {errors.title && <span className={classes.error}>{errors.title.message}</span>}
       </div>
 
@@ -190,15 +373,18 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
         </div>
       )}
 
-      <div className={classes.field}>
-        <label className={classes.label}>Постер (URL)</label>
-        <input
-          type="url"
-          placeholder="https://..."
-          {...register('poster_url')}
-          className={classes.input}
-        />
-      </div>
+      {posterUrlValue && (
+        <div className={classes.posterPreview}>
+          <img src={posterUrlValue} alt="Постер" />
+          <button
+            type="button"
+            className={classes.removePoster}
+            onClick={() => setValue('poster_url', '')}
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       <div className={classes.field}>
         <label className={classes.label}>Нотатки</label>
