@@ -11,6 +11,7 @@ interface MovieItemProps {
   onClick?: (movie: Movie) => void
   onEdit?: (movie: Movie) => void
   onDelete?: (movie: Movie) => void
+  onInstantDelete?: (movie: Movie) => void
   isActive?: boolean
   onSwipeStart?: () => void
   onSwipeEnd?: () => void
@@ -152,6 +153,7 @@ export function MovieItem({
   onClick,
   onEdit,
   onDelete,
+  onInstantDelete,
   isActive,
   onSwipeStart,
   onSwipeEnd,
@@ -226,11 +228,10 @@ export function MovieItem({
       onSwipeEnd?.()
       onEdit?.(movie)
     }
-    // Full swipe left - trigger delete
+    // Full swipe left - instant delete (optimistic)
     else if (swipeOffset <= -FULL_SWIPE_THRESHOLD) {
-      setOffset(0)
       onSwipeEnd?.()
-      onDelete?.(movie)
+      onInstantDelete?.(movie) ?? onDelete?.(movie)
     }
     // Partial swipe right - open edit action
     else if (swipeOffset > SWIPE_THRESHOLD) {
@@ -265,6 +266,10 @@ export function MovieItem({
 
   const isFullSwipeRight = offset >= FULL_SWIPE_THRESHOLD
   const isFullSwipeLeft = offset <= -FULL_SWIPE_THRESHOLD
+
+  // Calculate progress for background color intensity (0 to 1)
+  const deleteProgress = Math.min(1, Math.abs(Math.min(offset, 0)) / FULL_SWIPE_THRESHOLD)
+  const editProgress = Math.min(1, Math.max(offset, 0) / FULL_SWIPE_THRESHOLD)
 
   const showEpisodes = movie.type !== 'movie' && movie.total_episodes && movie.total_episodes > 1
 
@@ -306,12 +311,37 @@ export function MovieItem({
     )
   }
 
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onEdit?.(movie)
+  }
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onInstantDelete?.(movie) ?? onDelete?.(movie)
+  }
+
   // Card view
   if (viewMode === 'card') {
     return (
       <li className={classes.cardItem} onClick={() => onClick?.(movie)}>
         {movie.is_favorite && <span className={classes.favoriteIcon}>❤️</span>}
         {renderCardPoster()}
+        {/* Desktop hover overlay */}
+        <div className={classes.cardHoverActions}>
+          <button className={classes.cardEditBtn} onClick={handleEditClick} title="Редагувати">
+            ✏️
+          </button>
+          <button className={classes.cardDeleteBtn} onClick={handleDeleteClick} title="Видалити">
+            🗑
+          </button>
+        </div>
+        {/* Mobile action buttons */}
+        <div className={classes.cardMobileActions}>
+          <button className={classes.cardMobileDeleteBtn} onClick={handleDeleteClick} title="Видалити">
+            🗑
+          </button>
+        </div>
         <div className={classes.cardContent}>
           <h3 className={classes.cardTitle}>{movie.title}</h3>
           <div className={classes.cardMeta}>
@@ -340,13 +370,20 @@ export function MovieItem({
 
   // List view
   return (
-    <li className={classes.swipeContainer}>
-      <div className={classes.backgroundActions}>
+    <li
+      className={classes.swipeContainer}
+      style={{
+        '--delete-progress': deleteProgress,
+        '--edit-progress': editProgress,
+      } as React.CSSProperties}
+    >
+      <div className={`${classes.backgroundActions} ${offset < 0 ? classes.deleteBackground : ''} ${offset > 0 ? classes.editBackground : ''}`}>
         <div
           className={`${classes.actionBtn} ${classes.editAction} ${isFullSwipeRight ? classes.fullSwipe : ''}`}
           style={{ opacity: offset > 0 ? 1 : 0 }}
         >
           <button onClick={handleEditAction}>✏️</button>
+          {isFullSwipeRight && <span className={classes.actionLabel}>Редагувати</span>}
         </div>
 
         <div
@@ -354,6 +391,7 @@ export function MovieItem({
           style={{ opacity: offset < 0 ? 1 : 0 }}
         >
           <button onClick={handleDeleteAction}>🗑</button>
+          {isFullSwipeLeft && <span className={classes.actionLabel}>Видалити</span>}
         </div>
       </div>
 
@@ -380,6 +418,14 @@ export function MovieItem({
         </div>
 
         <div className={classes.actions}>
+          <div className={classes.hoverActions}>
+            <button className={classes.hoverEditBtn} onClick={handleEditClick} title="Редагувати">
+              ✏️
+            </button>
+            <button className={classes.hoverDeleteBtn} onClick={handleDeleteClick} title="Видалити">
+              🗑
+            </button>
+          </div>
           <span className={`${classes.rating} ${movie.rating && movie.rating >= 8 ? classes.high : ''}`}>
             {movie.rating ?? '-'}
           </span>

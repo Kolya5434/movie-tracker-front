@@ -1,10 +1,9 @@
-import { Suspense, useState, useMemo } from 'react'
+import { Suspense, useState, useMemo, useCallback } from 'react'
 import { fetchMovies } from './utils/getMovies.ts'
 import { deleteMovie } from './utils/deleteMovie.ts'
 import { getUpcomingEpisodes } from './utils/getUpcomingEpisodes.ts'
 import { MovieForm } from './components/MovieForm.tsx'
 import { MovieList, type MovieFilters, type SortField, type SortOrder } from './components/MovieList.tsx'
-import { ConfirmModal } from './components/ConfirmModal.tsx'
 import { FilterDrawer, type FilterValues } from './components/FilterDrawer.tsx'
 import { CustomSelect, type SelectOption } from './components/CustomSelect.tsx'
 import { Header } from './components/Header.tsx'
@@ -12,6 +11,7 @@ import { MobileNav } from './components/MobileNav.tsx'
 import { Stats } from './components/Stats.tsx'
 import { MovieDetails } from './components/MovieDetails.tsx'
 import { UpcomingEpisodes } from './components/UpcomingEpisodes.tsx'
+import { UndoToast } from './components/UndoToast.tsx'
 import { useTheme } from './hooks/useTheme.ts'
 import { TYPE_LABELS, STATUS_LABELS } from './constants/constants.ts'
 import type { Movie } from './types/movie.ts'
@@ -44,9 +44,8 @@ function App() {
   const [currentView, setCurrentView] = useState<View>('home')
   const [previousView, setPreviousView] = useState<View>('home')
   const [filters, setFilters] = useState<MovieFilters>({})
-  const [movieToDelete, setMovieToDelete] = useState<Movie | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [pendingDelete, setPendingDelete] = useState<Movie | null>(null)
   const [filterValues, setFilterValues] = useState<FilterValues>(DEFAULT_FILTER_VALUES)
   const [searchQuery, setSearchQuery] = useState('')
   const [sortValue, setSortValue] = useState('created_at:desc')
@@ -150,29 +149,30 @@ function App() {
 
   const hasActiveAdvancedFilters = filterValues.ratingRange[0] > 0 || filterValues.ratingRange[1] < 10
 
-  const handleDeleteRequest = (movie: Movie) => {
-    setMovieToDelete(movie)
-  }
-
-  const handleDeleteConfirm = async () => {
-    if (!movieToDelete) return
-    setIsDeleting(true)
-    try {
-      await deleteMovie(movieToDelete.id)
-      setMovieToDelete(null)
+  // Delete with undo toast
+  const handleDelete = useCallback((movie: Movie) => {
+    setPendingDelete(movie)
+    // Close editing form if we're deleting the movie being edited
+    if (editingMovie?.id === movie.id) {
       setEditingMovie(null)
-      setCurrentView('home')
-      refreshMovies()
-    } catch (error) {
-      alert('Помилка при видаленні: ' + error)
-    } finally {
-      setIsDeleting(false)
+      setCurrentView(previousView)
     }
-  }
+  }, [editingMovie, previousView])
 
-  const handleDeleteCancel = () => {
-    setMovieToDelete(null)
-  }
+  const handleUndoDelete = useCallback(() => {
+    setPendingDelete(null)
+    refreshMovies()
+  }, [])
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!pendingDelete) return
+    try {
+      await deleteMovie(pendingDelete.id)
+    } catch (error) {
+      console.error('Delete failed:', error)
+    }
+    setPendingDelete(null)
+  }, [pendingDelete])
 
   // Форма додавання/редагування
   if (currentView === 'add') {
@@ -191,16 +191,13 @@ function App() {
           movie={editingMovie}
           onSuccess={handleFormSuccess}
           onCancel={handleCancel}
-          onDelete={handleDeleteRequest}
+          onDelete={handleDelete}
         />
-
-        <ConfirmModal
-          isOpen={!!movieToDelete}
-          title="Видалити запис?"
-          message={`Ви впевнені, що хочете видалити "${movieToDelete?.title}"? Цю дію не можна скасувати.`}
-          onConfirm={handleDeleteConfirm}
-          onCancel={handleDeleteCancel}
-          isLoading={isDeleting}
+        <UndoToast
+          message={`"${pendingDelete?.title}" видалено`}
+          isVisible={!!pendingDelete}
+          onUndo={handleUndoDelete}
+          onComplete={handleConfirmDelete}
         />
         <MobileNav currentView={currentView} onNavigate={handleNavigate} />
       </div>
@@ -283,7 +280,9 @@ function App() {
             moviePromise={moviePromise}
             onMovieClick={handleMovieClick}
             onEdit={handleMovieClick}
-            onDelete={handleDeleteRequest}
+            onDelete={handleDelete}
+            onInstantDelete={handleDelete}
+            pendingDeleteId={pendingDelete?.id}
             filters={filters}
           />
         </Suspense>
@@ -304,13 +303,11 @@ function App() {
           />
         )}
 
-        <ConfirmModal
-          isOpen={!!movieToDelete}
-          title="Видалити запис?"
-          message={`Ви впевнені, що хочете видалити "${movieToDelete?.title}"? Цю дію не можна скасувати.`}
-          onConfirm={handleDeleteConfirm}
-          onCancel={handleDeleteCancel}
-          isLoading={isDeleting}
+        <UndoToast
+          message={`"${pendingDelete?.title}" видалено`}
+          isVisible={!!pendingDelete}
+          onUndo={handleUndoDelete}
+          onComplete={handleConfirmDelete}
         />
         <MobileNav currentView={currentView} onNavigate={handleNavigate} />
       </div>
@@ -338,7 +335,9 @@ function App() {
           moviePromise={moviePromise}
           onMovieClick={handleMovieClick}
           onEdit={handleMovieClick}
-          onDelete={handleDeleteRequest}
+          onDelete={handleDelete}
+          onInstantDelete={handleDelete}
+          pendingDeleteId={pendingDelete?.id}
           limit={6}
         />
       </Suspense>
@@ -351,13 +350,11 @@ function App() {
         />
       )}
 
-      <ConfirmModal
-        isOpen={!!movieToDelete}
-        title="Видалити запис?"
-        message={`Ви впевнені, що хочете видалити "${movieToDelete?.title}"? Цю дію не можна скасувати.`}
-        onConfirm={handleDeleteConfirm}
-        onCancel={handleDeleteCancel}
-        isLoading={isDeleting}
+      <UndoToast
+        message={`"${pendingDelete?.title}" видалено`}
+        isVisible={!!pendingDelete}
+        onUndo={handleUndoDelete}
+        onComplete={handleConfirmDelete}
       />
       <MobileNav currentView={currentView} onNavigate={handleNavigate} />
     </div>

@@ -58,6 +58,13 @@
   border-radius: 12px;
   overflow: hidden;
   background: var(--bg-tertiary);
+  transition: height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+
+  &.deleting {
+    height: 0;
+    opacity: 0;
+    margin-top: -12px;
+  }
 }
 
 .backgroundActions {
@@ -69,14 +76,23 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 10px;
+  padding: 0 16px;
   z-index: 0;
+  transition: background-color 0.15s ease;
+
+  &.deleteBackground {
+    background: color-mix(in srgb, #dc2626 calc(var(--delete-progress, 0) * 100%), var(--bg-tertiary));
+  }
+
+  &.editBackground {
+    background: color-mix(in srgb, #3b82f6 calc(var(--edit-progress, 0) * 100%), var(--bg-tertiary));
+  }
 }
 
 .actionBtn {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
   height: 100%;
   transition: opacity 0.2s ease;
 
@@ -91,7 +107,8 @@
     align-items: center;
     justify-content: center;
     color: white;
-    transition: transform 0.15s ease, width 0.15s ease;
+    transition: transform 0.15s ease, background 0.15s ease;
+    background: transparent;
 
     &:active {
       transform: scale(0.9);
@@ -99,16 +116,37 @@
   }
 
   &.fullSwipe button {
-    transform: scale(1.2);
+    transform: scale(1.3);
   }
 }
 
-.editAction button {
-  background: #3b82f6;
+.actionLabel {
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+
+  .fullSwipe & {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.deleteAction button {
-  background: #5b1919;
+.editAction {
+  button {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+.deleteAction {
+  flex-direction: row-reverse;
+
+  button {
+    background: rgba(255, 255, 255, 0.2);
+  }
 }
 
 .item {
@@ -178,6 +216,57 @@
   margin-top: 4px;
 }
 
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hoverActions {
+  display: none;
+  gap: 4px;
+
+  @media (hover: hover) and (pointer: fine) {
+    .item:hover & {
+      display: flex;
+    }
+  }
+}
+
+.hoverEditBtn,
+.hoverDeleteBtn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  transition: background 0.15s, transform 0.15s;
+
+  &:active {
+    transform: scale(0.9);
+  }
+}
+
+.hoverEditBtn {
+  background: rgba(59, 130, 246, 0.15);
+
+  &:hover {
+    background: rgba(59, 130, 246, 0.25);
+  }
+}
+
+.hoverDeleteBtn {
+  background: rgba(220, 38, 38, 0.15);
+
+  &:hover {
+    background: rgba(220, 38, 38, 0.25);
+  }
+}
+
 .rating {
   height: 32px;
   padding: 0 10px;
@@ -213,6 +302,90 @@
 
   &:active {
     transform: scale(0.98);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover .cardHoverActions {
+      opacity: 1;
+    }
+  }
+}
+
+.cardHoverActions {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 3;
+}
+
+.cardEditBtn,
+.cardDeleteBtn {
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  transition: background 0.15s, transform 0.15s;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.cardEditBtn {
+  background: #3b82f6;
+}
+
+.cardDeleteBtn {
+  background: #dc2626;
+}
+
+// Mobile-only delete button on cards
+.cardMobileActions {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 3;
+  display: flex;
+  gap: 6px;
+
+  @media (hover: hover) and (pointer: fine) {
+    display: none;
+  }
+}
+
+.cardMobileDeleteBtn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  transition: background 0.15s;
+
+  &:active {
+    background: #dc2626;
   }
 }
 

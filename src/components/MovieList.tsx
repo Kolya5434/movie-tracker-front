@@ -30,11 +30,13 @@ interface MovieListProps {
   onMovieClick?: (movie: Movie) => void
   onEdit?: (movie: Movie) => void
   onDelete?: (movie: Movie) => void
+  onInstantDelete?: (movie: Movie) => void
+  pendingDeleteId?: number | null
   limit?: number
   filters?: MovieFilters
 }
 
-export function MovieList({ moviePromise, onMovieClick, onEdit, onDelete, limit, filters }: MovieListProps) {
+export function MovieList({ moviePromise, onMovieClick, onEdit, onDelete, onInstantDelete, pendingDeleteId, limit, filters }: MovieListProps) {
   const [activeSwipeId, setActiveSwipeId] = useState<number | null>(null)
   const [viewMode, setViewMode] = useState<ViewMode>(getStoredViewMode)
   const allMovies = use(moviePromise)
@@ -64,7 +66,10 @@ export function MovieList({ moviePromise, onMovieClick, onEdit, onDelete, limit,
     return <div className={classes.empty}>Список порожній</div>
   }
 
-  let filtered = allMovies
+  // Optimistic delete - hide movie immediately
+  let filtered = pendingDeleteId
+    ? allMovies.filter(m => m.id !== pendingDeleteId)
+    : allMovies
 
   // Пошук по назві
   if (filters?.search) {
@@ -130,6 +135,7 @@ export function MovieList({ moviePromise, onMovieClick, onEdit, onDelete, limit,
             onClick={onMovieClick}
             onEdit={onEdit}
             onDelete={onDelete}
+            onInstantDelete={onInstantDelete}
             isActive={activeSwipeId === movie.id}
             onSwipeStart={() => setActiveSwipeId(movie.id)}
             onSwipeEnd={() => setActiveSwipeId(null)}
