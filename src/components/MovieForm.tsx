@@ -119,8 +119,15 @@ const STATUS_OPTIONS = [
   { value: 'dropped', label: 'Кинув' }
 ]
 
+export interface PrefillData {
+  title: string
+  poster_url: string | null
+  type: MovieType
+}
+
 interface MovieFormProps {
   movie?: Movie | null
+  prefill?: PrefillData | null
   onSuccess: () => void
   onCancel?: () => void
   onDelete?: (movie: Movie) => void
@@ -143,7 +150,7 @@ interface FormValues {
   genres: string[] | null
 }
 
-export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormProps) {
+export function MovieForm({ movie, prefill, onSuccess, onCancel, onDelete }: MovieFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [searchResults, setSearchResults] = useState<TMDBSearchResult[]>([])
   const [showDropdown, setShowDropdown] = useState(false)
@@ -162,13 +169,13 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
     formState: { errors }
   } = useForm<FormValues>({
     defaultValues: {
-      title: movie?.title ?? '',
-      type: movie?.type ?? 'movie',
+      title: movie?.title ?? prefill?.title ?? '',
+      type: movie?.type ?? prefill?.type ?? 'movie',
       status: movie?.status ?? 'planned',
       rating: movie?.rating ?? '',
       total_episodes: movie?.total_episodes ?? '',
       watched_episodes: movie?.watched_episodes ?? '',
-      poster_url: movie?.poster_url ?? '',
+      poster_url: movie?.poster_url ?? prefill?.poster_url ?? '',
       review: movie?.review ?? '',
       tmdb_id: movie?.tmdb_id ?? null,
       tmdb_rating: movie?.tmdb_rating ?? null,
@@ -252,13 +259,13 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
 
   useEffect(() => {
     reset({
-      title: movie?.title ?? '',
-      type: movie?.type ?? 'movie',
+      title: movie?.title ?? prefill?.title ?? '',
+      type: movie?.type ?? prefill?.type ?? 'movie',
       status: movie?.status ?? 'planned',
       rating: movie?.rating ?? '',
       total_episodes: movie?.total_episodes ?? '',
       watched_episodes: movie?.watched_episodes ?? '',
-      poster_url: movie?.poster_url ?? '',
+      poster_url: movie?.poster_url ?? prefill?.poster_url ?? '',
       review: movie?.review ?? '',
       tmdb_id: movie?.tmdb_id ?? null,
       tmdb_rating: movie?.tmdb_rating ?? null,
@@ -270,7 +277,7 @@ export function MovieForm({ movie, onSuccess, onCancel, onDelete }: MovieFormPro
     setUserTyping(false)
     setShowDropdown(false)
     setSearchResults([])
-  }, [movie, reset])
+  }, [movie, prefill, reset])
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setIsSubmitting(true)

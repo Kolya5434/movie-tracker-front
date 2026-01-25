@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
-import type { Movie } from '../types/movie'
+import type { Movie, MovieType } from '../types/movie'
 import { STATUS_LABELS, TYPE_LABELS } from '../constants/constants'
 import { tmdbAPIKey } from '../environment'
+import type { PrefillData } from './MovieForm'
 import classes from './MovieDetails.module.scss'
 
 interface MovieDetailsProps {
   movie: Movie
   onEdit: () => void
   onClose: () => void
+  onQuickAdd?: (prefill: PrefillData) => void
 }
 
 interface TMDBDetails {
@@ -29,7 +31,7 @@ interface TMDBRecommendation {
   vote_average: number
 }
 
-export function MovieDetails({ movie, onEdit, onClose }: MovieDetailsProps) {
+export function MovieDetails({ movie, onEdit, onClose, onQuickAdd }: MovieDetailsProps) {
   const [tmdbDetails, setTmdbDetails] = useState<TMDBDetails | null>(null)
   const [recommendations, setRecommendations] = useState<TMDBRecommendation[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -208,19 +210,39 @@ export function MovieDetails({ movie, onEdit, onClose }: MovieDetailsProps) {
               <div className={classes.recommendations}>
                 <h4>Схожі</h4>
                 <div className={classes.recGrid}>
-                  {recommendations.map(rec => (
-                    <div key={rec.id} className={classes.recItem}>
-                      {rec.poster_path ? (
-                        <img
-                          src={`https://image.tmdb.org/t/p/w154${rec.poster_path}`}
-                          alt={rec.title || rec.name}
-                        />
-                      ) : (
-                        <div className={classes.recNoImage}>?</div>
-                      )}
-                      <span className={classes.recTitle}>{rec.title || rec.name}</span>
-                    </div>
-                  ))}
+                  {recommendations.map(rec => {
+                    const title = rec.title || rec.name || ''
+                    const posterUrl = rec.poster_path
+                      ? `https://image.tmdb.org/t/p/w500${rec.poster_path}`
+                      : null
+                    const isSeriesType = movie.type === 'series' || movie.type === 'cartoon'
+                    const recType: MovieType = isSeriesType ? 'series' : 'movie'
+
+                    return (
+                      <div key={rec.id} className={classes.recItem}>
+                        <div className={classes.recPosterWrap}>
+                          {rec.poster_path ? (
+                            <img
+                              src={`https://image.tmdb.org/t/p/w154${rec.poster_path}`}
+                              alt={title}
+                            />
+                          ) : (
+                            <div className={classes.recNoImage}>?</div>
+                          )}
+                          {onQuickAdd && (
+                            <button
+                              className={classes.recAddBtn}
+                              onClick={() => onQuickAdd({ title, poster_url: posterUrl, type: recType })}
+                              title="Додати до списку"
+                            >
+                              +
+                            </button>
+                          )}
+                        </div>
+                        <span className={classes.recTitle}>{title}</span>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             )}

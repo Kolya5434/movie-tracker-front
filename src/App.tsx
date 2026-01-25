@@ -2,7 +2,7 @@ import { Suspense, useState, useMemo, useCallback } from 'react'
 import { fetchMovies } from './utils/getMovies.ts'
 import { deleteMovie } from './utils/deleteMovie.ts'
 import { getUpcomingEpisodes } from './utils/getUpcomingEpisodes.ts'
-import { MovieForm } from './components/MovieForm.tsx'
+import { MovieForm, type PrefillData } from './components/MovieForm.tsx'
 import { MovieList, type MovieFilters, type SortField, type SortOrder } from './components/MovieList.tsx'
 import { FilterDrawer, type FilterValues } from './components/FilterDrawer.tsx'
 import { CustomSelect, type SelectOption } from './components/CustomSelect.tsx'
@@ -50,6 +50,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [sortValue, setSortValue] = useState('created_at:desc')
   const [viewingMovie, setViewingMovie] = useState<Movie | null>(null)
+  const [prefillData, setPrefillData] = useState<PrefillData | null>(null)
 
   // Promise для нагадувань про нові епізоди
   const episodesPromise = useMemo(
@@ -80,18 +81,29 @@ function App() {
 
   const handleFormSuccess = () => {
     setEditingMovie(null)
+    setPrefillData(null)
     setCurrentView(previousView)
     refreshMovies()
   }
 
   const handleCancel = () => {
     setEditingMovie(null)
+    setPrefillData(null)
     setCurrentView('home')
   }
 
   const handleAddClick = () => {
     setPreviousView(currentView)
     setEditingMovie(null)
+    setPrefillData(null)
+    setCurrentView('add')
+  }
+
+  const handleQuickAdd = (prefill: PrefillData) => {
+    setPreviousView(currentView)
+    setEditingMovie(null)
+    setPrefillData(prefill)
+    setViewingMovie(null)
     setCurrentView('add')
   }
 
@@ -189,6 +201,7 @@ function App() {
         </header>
         <MovieForm
           movie={editingMovie}
+          prefill={prefillData}
           onSuccess={handleFormSuccess}
           onCancel={handleCancel}
           onDelete={handleDelete}
@@ -300,6 +313,7 @@ function App() {
             movie={viewingMovie}
             onEdit={handleEditFromDetails}
             onClose={handleCloseDetails}
+            onQuickAdd={handleQuickAdd}
           />
         )}
 
@@ -347,6 +361,7 @@ function App() {
           movie={viewingMovie}
           onEdit={handleEditFromDetails}
           onClose={handleCloseDetails}
+          onQuickAdd={handleQuickAdd}
         />
       )}
 
