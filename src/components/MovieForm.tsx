@@ -189,6 +189,7 @@ export function MovieForm({ movie, prefill, onSuccess, onCancel, onDelete }: Mov
   const typeValue = watch('type') as MovieType
   const statusValue = watch('status')
   const titleValue = watch('title')
+  const totalEpisodesValue = watch('total_episodes')
 
   // Debounced search - only when user is typing
   useEffect(() => {
@@ -445,10 +446,20 @@ export function MovieForm({ movie, prefill, onSuccess, onCancel, onDelete }: Mov
             <input
               type="number"
               min="0"
+              max={totalEpisodesValue ? Number(totalEpisodesValue) : undefined}
               placeholder="0"
-              {...register('watched_episodes', { min: 0 })}
+              {...register('watched_episodes', {
+                min: 0,
+                validate: value => {
+                  if (!value || !totalEpisodesValue) return true
+                  return Number(value) <= Number(totalEpisodesValue) || 'Не може бути більше ніж всього серій'
+                }
+              })}
               className={classes.input}
             />
+            {errors.watched_episodes && (
+              <span className={classes.error}>{errors.watched_episodes.message}</span>
+            )}
           </div>
         </div>
       )}

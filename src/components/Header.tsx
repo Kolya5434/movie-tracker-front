@@ -1,7 +1,7 @@
 import { ThemeToggle } from './ThemeToggle'
 import classes from './Header.module.scss'
 
-type View = 'home' | 'add' | 'all'
+type View = 'home' | 'add' | 'all' | 'calendar'
 
 interface HeaderProps {
   currentView: View
@@ -35,6 +35,12 @@ export function Header({ currentView, onNavigate, theme, onThemeToggle }: Header
             onClick={() => onNavigate('home')}
           >
             Головна
+          </button>
+          <button
+            className={`${classes.navItem} ${currentView === 'calendar' ? classes.active : ''}`}
+            onClick={() => onNavigate('calendar')}
+          >
+            Календар
           </button>
           <button
             className={`${classes.navItem} ${currentView === 'all' ? classes.active : ''}`}

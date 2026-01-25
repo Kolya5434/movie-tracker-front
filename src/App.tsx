@@ -4,7 +4,8 @@ import { deleteMovie } from './utils/deleteMovie.ts'
 import { getUpcomingEpisodes } from './utils/getUpcomingEpisodes.ts'
 import { MovieForm, type PrefillData } from './components/MovieForm.tsx'
 import { MovieList, type MovieFilters, type SortField, type SortOrder } from './components/MovieList.tsx'
-import { FilterDrawer, type FilterValues } from './components/FilterDrawer.tsx'
+import { type FilterValues } from './components/FilterDrawer.tsx'
+import { FilterDrawerWrapper } from './components/FilterDrawerWrapper.tsx'
 import { CustomSelect, type SelectOption } from './components/CustomSelect.tsx'
 import { Header } from './components/Header.tsx'
 import { MobileNav } from './components/MobileNav.tsx'
@@ -12,13 +13,19 @@ import { Stats } from './components/Stats.tsx'
 import { MovieDetails } from './components/MovieDetails.tsx'
 import { UpcomingEpisodes } from './components/UpcomingEpisodes.tsx'
 import { UndoToast } from './components/UndoToast.tsx'
+import { RandomPicker } from './components/RandomPicker.tsx'
+import { WatchCalendar } from './components/WatchCalendar.tsx'
 import { useTheme } from './hooks/useTheme.ts'
 import { TYPE_LABELS, STATUS_LABELS } from './constants/constants.ts'
 import type { Movie } from './types/movie.ts'
 import classes from './App.module.scss'
 
+const DEFAULT_YEAR_BOUNDS: [number, number] = [1900, new Date().getFullYear()]
+
 const DEFAULT_FILTER_VALUES: FilterValues = {
-  ratingRange: [0, 10]
+  ratingRange: [0, 10],
+  yearRange: DEFAULT_YEAR_BOUNDS,
+  genres: []
 }
 
 const TYPE_OPTIONS: SelectOption[] = [
@@ -35,7 +42,7 @@ const SORT_OPTIONS: SelectOption[] = [
   { value: 'title:desc', label: 'Я → А' }
 ]
 
-type View = 'home' | 'add' | 'all'
+type View = 'home' | 'add' | 'all' | 'calendar'
 
 function App() {
   const { theme, toggleTheme } = useTheme()
@@ -55,6 +62,33 @@ function App() {
   // Promise для нагадувань про нові епізоди
   const episodesPromise = useMemo(
     () => moviePromise.then(movies => getUpcomingEpisodes(movies)),
+    [moviePromise]
+  )
+
+  // Обчислюємо доступні жанри та межі років з фільмів
+  const filterMetaPromise = useMemo(
+    () => moviePromise.then(movies => {
+      const genreSet = new Set<string>()
+      let minYear = Infinity
+      let maxYear = -Infinity
+
+      movies.forEach(m => {
+        if (m.genres) {
+          m.genres.forEach(g => genreSet.add(g))
+        }
+        if (m.year) {
+          if (m.year < minYear) minYear = m.year
+          if (m.year > maxYear) maxYear = m.year
+        }
+      })
+
+      const genres = Array.from(genreSet).sort((a, b) => a.localeCompare(b, 'uk'))
+      const yearBounds: [number, number] = minYear <= maxYear
+        ? [minYear, maxYear]
+        : DEFAULT_YEAR_BOUNDS
+
+      return { genres, yearBounds }
+    }),
     [moviePromise]
   )
 
@@ -139,6 +173,8 @@ function App() {
       handleAddClick()
     } else if (view === 'all') {
       handleViewAll()
+    } else if (view === 'calendar') {
+      setCurrentView('calendar')
     } else {
       handleBackHome()
     }
@@ -150,16 +186,24 @@ function App() {
       ...f,
       ratingRange: values.ratingRange[0] === 0 && values.ratingRange[1] === 10
         ? undefined
-        : values.ratingRange
+        : values.ratingRange,
+      yearRange: values.yearRange[0] === DEFAULT_YEAR_BOUNDS[0] && values.yearRange[1] === DEFAULT_YEAR_BOUNDS[1]
+        ? undefined
+        : values.yearRange,
+      genres: values.genres.length > 0 ? values.genres : undefined
     }))
   }
 
   const handleFilterReset = () => {
     setFilterValues(DEFAULT_FILTER_VALUES)
-    setFilters(f => ({ ...f, ratingRange: undefined }))
+    setFilters(f => ({ ...f, ratingRange: undefined, yearRange: undefined, genres: undefined }))
   }
 
-  const hasActiveAdvancedFilters = filterValues.ratingRange[0] > 0 || filterValues.ratingRange[1] < 10
+  const hasActiveAdvancedFilters =
+    filterValues.ratingRange[0] > 0 ||
+    filterValues.ratingRange[1] < 10 ||
+    filterValues.genres.length > 0 ||
+    (filterValues.yearRange[0] !== DEFAULT_YEAR_BOUNDS[0] || filterValues.yearRange[1] !== DEFAULT_YEAR_BOUNDS[1])
 
   // Delete with undo toast
   const handleDelete = useCallback((movie: Movie) => {
@@ -300,13 +344,49 @@ function App() {
           />
         </Suspense>
 
-        <FilterDrawer
-          isOpen={isFilterOpen}
-          onClose={() => setIsFilterOpen(false)}
-          values={filterValues}
-          onChange={handleFilterValuesChange}
-          onReset={handleFilterReset}
+        <Suspense fallback={null}>
+          <FilterDrawerWrapper
+            isOpen={isFilterOpen}
+            onClose={() => setIsFilterOpen(false)}
+            values={filterValues}
+            onChange={handleFilterValuesChange}
+            onReset={handleFilterReset}
+            filterMetaPromise={filterMetaPromise}
+          />
+        </Suspense>
+
+        {viewingMovie && (
+          <MovieDetails
+            movie={viewingMovie}
+            onEdit={handleEditFromDetails}
+            onClose={handleCloseDetails}
+            onQuickAdd={handleQuickAdd}
+          />
+        )}
+
+        <UndoToast
+          message={`"${pendingDelete?.title}" видалено`}
+          isVisible={!!pendingDelete}
+          onUndo={handleUndoDelete}
+          onComplete={handleConfirmDelete}
         />
+        <MobileNav currentView={currentView} onNavigate={handleNavigate} />
+      </div>
+    )
+  }
+
+  // Календар переглядів
+  if (currentView === 'calendar') {
+    return (
+      <div className={classes.app}>
+        <Header currentView={currentView} onNavigate={handleNavigate} theme={theme} onThemeToggle={toggleTheme} />
+        <header className={classes.pageHeader}>
+          <h1 className={classes.pageTitle}>Календар переглядів</h1>
+        </header>
+
+        <Suspense fallback={<p className={classes.loading}>Завантаження...</p>}>
+          <WatchCalendar moviePromise={moviePromise} onMovieClick={handleMovieClick} />
+        </Suspense>
 
         {viewingMovie && (
           <MovieDetails
@@ -335,6 +415,10 @@ function App() {
 
       <Suspense fallback={null}>
         <UpcomingEpisodes episodesPromise={episodesPromise} />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <RandomPicker moviePromise={moviePromise} onMovieClick={handleMovieClick} />
       </Suspense>
 
       <header className={classes.pageHeader}>

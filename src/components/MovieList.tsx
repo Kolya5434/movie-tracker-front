@@ -19,6 +19,8 @@ export interface MovieFilters {
   type?: string
   status?: string
   ratingRange?: [number, number]
+  yearRange?: [number, number]
+  genres?: string[]
   search?: string
   sortBy?: SortField
   sortOrder?: SortOrder
@@ -83,6 +85,19 @@ export function MovieList({ moviePromise, onMovieClick, onEdit, onDelete, onInst
   if (filters?.ratingRange) {
     const [min, max] = filters.ratingRange
     filtered = filtered.filter(m => (m.rating ?? 0) >= min && (m.rating ?? 0) <= max)
+  }
+  if (filters?.yearRange) {
+    const [minYear, maxYear] = filters.yearRange
+    filtered = filtered.filter(m => {
+      const year = m.year ?? 0
+      return year >= minYear && year <= maxYear
+    })
+  }
+  if (filters?.genres && filters.genres.length > 0) {
+    filtered = filtered.filter(m => {
+      if (!m.genres || m.genres.length === 0) return false
+      return filters.genres!.some(g => m.genres!.includes(g))
+    })
   }
 
   // Сортування

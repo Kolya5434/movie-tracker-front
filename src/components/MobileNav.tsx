@@ -1,6 +1,6 @@
 import classes from './MobileNav.module.scss'
 
-type View = 'home' | 'add' | 'all'
+type View = 'home' | 'add' | 'all' | 'calendar'
 
 interface MobileNavProps {
   currentView: View
@@ -21,6 +21,21 @@ export function MobileNav({ currentView, onNavigate }: MobileNavProps) {
           </svg>
         </span>
         <span className={classes.label}>Головна</span>
+      </button>
+
+      <button
+        className={`${classes.item} ${currentView === 'calendar' ? classes.active : ''}`}
+        onClick={() => onNavigate('calendar')}
+      >
+        <span className={classes.icon}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+        </span>
+        <span className={classes.label}>Календар</span>
       </button>
 
       <button

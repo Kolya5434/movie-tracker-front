@@ -34,6 +34,7 @@ interface TMDBRecommendation {
 export function MovieDetails({ movie, onEdit, onClose, onQuickAdd }: MovieDetailsProps) {
   const [tmdbDetails, setTmdbDetails] = useState<TMDBDetails | null>(null)
   const [recommendations, setRecommendations] = useState<TMDBRecommendation[]>([])
+  const [trailerKey, setTrailerKey] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   // Блокуємо скрол body та Escape для закриття
@@ -86,12 +87,28 @@ export function MovieDetails({ movie, onEdit, onClose, onQuickAdd }: MovieDetail
             release_date: details.release_date
           })
 
-          // Завантаження рекомендацій
-          const recsUrl = `https://api.themoviedb.org/3/${searchType}/${tmdbId}/recommendations?api_key=${tmdbAPIKey}&language=uk-UA`
-          const recsRes = await fetch(recsUrl)
+          // Завантаження рекомендацій та трейлера паралельно
+          const [recsRes, videosRes] = await Promise.all([
+            fetch(`https://api.themoviedb.org/3/${searchType}/${tmdbId}/recommendations?api_key=${tmdbAPIKey}&language=uk-UA`),
+            fetch(`https://api.themoviedb.org/3/${searchType}/${tmdbId}/videos?api_key=${tmdbAPIKey}&language=uk-UA`)
+          ])
+
           const recsData = await recsRes.json()
           if (recsData.results) {
             setRecommendations(recsData.results.slice(0, 6))
+          }
+
+          const videosData = await videosRes.json()
+          if (videosData.results && videosData.results.length > 0) {
+            // Шукаємо YouTube трейлер
+            const trailer = videosData.results.find(
+              (v: { type: string; site: string }) => v.type === 'Trailer' && v.site === 'YouTube'
+            ) || videosData.results.find(
+              (v: { site: string }) => v.site === 'YouTube'
+            )
+            if (trailer) {
+              setTrailerKey(trailer.key)
+            }
           }
         }
       } catch (error) {
@@ -247,9 +264,21 @@ export function MovieDetails({ movie, onEdit, onClose, onQuickAdd }: MovieDetail
               </div>
             )}
 
-            <button className={classes.editBtn} onClick={onEdit}>
-              Редагувати
-            </button>
+            <div className={classes.actions}>
+              {trailerKey && (
+                <a
+                  href={`https://www.youtube.com/watch?v=${trailerKey}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={classes.trailerBtn}
+                >
+                  ▶ Трейлер
+                </a>
+              )}
+              <button className={classes.editBtn} onClick={onEdit}>
+                Редагувати
+              </button>
+            </div>
           </div>
         </div>
       </div>
